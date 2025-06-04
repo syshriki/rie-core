@@ -1,0 +1,21 @@
+{
+    "server": {
+        "port": 9876,
+        "host": "0.0.0.0"
+    },
+    "db": {
+        "host": "localhost",
+        "port": 5432,
+        "database": "rie",
+        "user": "postgres",
+        "password": "postgres"
+    },
+    "logging": {
+        "level": "info"
+    },
+    "auth": {
+        "jwksUri": "https://test.auth/.well-known/jwks.json",
+        "audience": "test-audience",
+        "issuer": "http://test.auth/"
+    }
+}

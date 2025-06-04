@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "noEmit": true, // Optional - see note below
+    "target": "esnext",
+    "module": "nodenext",
+    "rewriteRelativeImportExtensions": true,
+    "erasableSyntaxOnly": true,
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true
+  },
+  "include": ["src/**/*","test/**/*"],
+  "exclude": ["node_modules"]
+}

@@ -1,0 +1,19 @@
+{
+    "server": {
+        "port": 3000,
+        "host": "0.0.0.0"
+    },
+    "db": {
+        "host": "localhost",
+        "port": 5432,
+        "database": "rieserver",
+        "user": "postgres",
+        "password": "postgres"
+    },
+    "logging": {
+        "level": "info"
+    },
+    "auth": {
+        "jwksUri": "http://localhost:3000/.well-known/jwks.json"
+    }
+}
