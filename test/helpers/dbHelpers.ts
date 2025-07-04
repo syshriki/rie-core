@@ -21,6 +21,7 @@ const createSqlClient = () => {
       ...postgres.toCamel,
       undefined: null,
     },
+    onnotice: (_) => {},
   });
 };
 

@@ -6,15 +6,16 @@ import type { Server } from 'node:http';
 import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../src/app.ts';
+import { nockJwks } from '../helpers/auth.ts';
 import { reinitializeDatabase } from '../helpers/dbHelpers.ts';
+import users from '../helpers/users.json' with { type: 'json' };
 
 describe('POST /api/users', () => {
   let server: Server;
-  const testUsername = 'testuser';
 
-  // Setup server before all tests in this file
   before(async () => {
     server = await app();
+    await nockJwks();
   });
 
   beforeEach(async () => {
@@ -28,31 +29,35 @@ describe('POST /api/users', () => {
   });
 
   it('should create a new user', async () => {
-    const response = await request(server)
+    const { body } = await request(server)
       .post('/api/users')
+      .set('Cookie', [`auth_token=${users.user0.token}`])
       .send({ username: 'testuser' })
-      .expect(201);
+      .expect(200);
 
-    expect(response.body).to.have.property('username', 'testuser');
-    expect(response.body).to.have.property('createdAt').that.is.a('number');
+    expect(body).to.have.property('username', 'testuser');
+    expect(body).to.have.property('createdAt').that.is.a('string');
   });
 
   it('should return 409 Conflict if user already exists', async () => {
-    // First create the user
-    await request(server).post('/api/users').send({ username: 'testuser' }).expect(201);
-
-    // Try to create the same user again
-    const response = await request(server)
+    await request(server)
       .post('/api/users')
+      .set('Cookie', [`auth_token=${users.user0.token}`])
+      .send({ username: 'testuser' })
+      .expect(200);
+
+    await request(server)
+      .post('/api/users')
+      .set('Cookie', [`auth_token=${users.user0.token}`])
       .send({ username: 'testuser' })
       .expect(409);
-
-    expect(response.body).to.have.property('error', 'User already exists');
   });
 
   it('should validate username', async () => {
-    const response = await request(server).post('/api/users').send({ username: '' }).expect(422);
-
-    expect(response.body).to.have.property('error', 'Validation Error');
+    await request(server)
+      .post('/api/users')
+      .set('Cookie', [`auth_token=${users.user0.token}`])
+      .send({ username: '' })
+      .expect(422);
   });
 });

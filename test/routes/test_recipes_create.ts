@@ -1,12 +1,11 @@
-/**
- * Tests for recipe creation endpoint - Direct Import Pattern
- */
-
 import type { Server } from 'node:http';
 import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../src/app.ts';
+import { nockJwks } from '../helpers/auth.ts';
 import { reinitializeDatabase } from '../helpers/dbHelpers.ts';
+import { createUser } from '../helpers/userHelper.ts';
+import users from '../helpers/users.json' with { type: 'json' };
 
 describe('POST /api/recipes', () => {
   let server: Server;
@@ -18,12 +17,11 @@ describe('POST /api/recipes', () => {
     instructions: ['Step 1', 'Step 2'],
   };
 
-  // Explicitly create server in each test suite
   before(async () => {
     server = await app();
+    await nockJwks();
   });
 
-  // Explicit teardown in the test file
   after(async () => {
     await new Promise<void>((resolve) => {
       server.close(() => resolve());
@@ -32,15 +30,13 @@ describe('POST /api/recipes', () => {
 
   beforeEach(async () => {
     await reinitializeDatabase();
-
-    // Create test user directly in the test
-    await request(server).post('/api/users').send({ username: testUsername }).expect(201);
+    await createUser(server, users.user0.token, { username: testUsername });
   });
 
   it('should create a new recipe', async () => {
     const response = await request(server)
       .post('/api/recipes')
-      .set('X-Username', testUsername)
+      .set('Cookie', [`auth_token=${users.user0.token}`])
       .send(testRecipe)
       .expect(201);
 

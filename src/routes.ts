@@ -17,6 +17,8 @@ import recipeUpdateController from './controllers/recipes/update.ts';
 import newsGetAllController from './controllers/news/getAll.ts';
 import newsGetByRecipeController from './controllers/news/getByRecipe.ts';
 
+import initController from './controllers/signup/index.ts';
+import auth from './middleware/auth.ts';
 import {
   recipeCreateInputSchema,
   recipeIdParamSchema,
@@ -24,44 +26,55 @@ import {
   recipeUpdateInputSchema,
 } from './schemas/recipe.ts';
 import { userCreateInputSchema } from './schemas/user.ts';
-import auth from './middleware/auth.ts';
-import initController from './controllers/init.ts';
 
-const router = new Router({ prefix: '/api' });
+const routerProtected = new Router({ prefix: '/api' });
+const routerUnprotected = new Router({ prefix: '/api' });
 
-router.use(auth);
+routerProtected.use(auth);
 
-router.post('/init', initController);
-router.post('/users', validate.body(userCreateInputSchema), userCreateController);
-router.get('/users/:username', userGetOneController);
-router.get('/recipes', validate.query(recipeSearchQuerySchema), recipeGetAllController);
-router.get('/recipes/:id', validate.params(recipeIdParamSchema), recipeGetOneController);
-router.post('/recipes', validate.body(recipeCreateInputSchema), recipeCreateController);
-router.put(
+routerProtected.post('/signup', initController);
+routerProtected.post('/users', validate.body(userCreateInputSchema), userCreateController);
+routerProtected.get('/users/:username', userGetOneController);
+routerProtected.get('/recipes', validate.query(recipeSearchQuerySchema), recipeGetAllController);
+routerProtected.get('/recipes/:id', validate.params(recipeIdParamSchema), recipeGetOneController);
+routerProtected.post('/recipes', validate.body(recipeCreateInputSchema), recipeCreateController);
+routerProtected.put(
   '/recipes/:id',
   validate.params(recipeIdParamSchema),
   validate.body(recipeUpdateInputSchema),
-  recipeUpdateController
+  recipeUpdateController,
 );
-router.delete('/recipes/:id', validate.params(recipeIdParamSchema), recipeDeleteController);
+routerProtected.delete(
+  '/recipes/:id',
+  validate.params(recipeIdParamSchema),
+  recipeDeleteController,
+);
 
-router.post(
+routerProtected.post(
   '/recipes/:id/favorite',
   validate.params(recipeIdParamSchema),
-  recipeAddFavoriteController
+  recipeAddFavoriteController,
 );
-router.delete(
+routerProtected.delete(
   '/recipes/:id/favorite',
   validate.params(recipeIdParamSchema),
-  recipeRemoveFavoriteController
+  recipeRemoveFavoriteController,
 );
-router.get('/recipes/favorites', validate.query(paginationSchema), recipeFavoritesController);
-router.get('/news', validate.query(paginationSchema), newsGetAllController);
-router.get(
+routerProtected.get(
+  '/recipes/favorites',
+  validate.query(paginationSchema),
+  recipeFavoritesController,
+);
+routerProtected.get('/news', validate.query(paginationSchema), newsGetAllController);
+routerProtected.get(
   '/recipes/:id/news',
   validate.params(recipeIdParamSchema),
   validate.query(paginationSchema),
-  newsGetByRecipeController
+  newsGetByRecipeController,
 );
 
-export default router;
+const combinedRouter = new Router();
+combinedRouter.use(routerProtected.routes(), routerProtected.allowedMethods());
+combinedRouter.use(routerUnprotected.routes(), routerUnprotected.allowedMethods());
+
+export default combinedRouter;

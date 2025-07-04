@@ -1,0 +1,15 @@
+{
+    "google": {
+        "iss": "https://accounts.google.com",
+        "azp": "407408718192.apps.googleusercontent.com",
+        "aud": "407408718192.apps.googleusercontent.com",
+        "sub": "108587306538750723328",
+        "at_hash": "X1HNGEl6vsXRx6qNc-APyw",
+        "name": "Shlomo Shriki",
+        "picture": "https://lh3.googleusercontent.com/a/ACg8ocKCNfmdEmRoqI6Y0fv8amiZmKzFiA_xFdWc-J0OPgdW_SW0mQ=s96-c",
+        "given_name": "Shlomo",
+        "family_name": "Shriki",
+        "iat": 1749103686,
+        "exp": 1749107286
+    }
+}

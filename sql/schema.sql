@@ -4,10 +4,24 @@ DROP SCHEMA IF EXISTS postgres CASCADE;
 
 CREATE SCHEMA postgres;
 
+CREATE TABLE users_providers (
+   id             BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+   user_id        BIGINT NOT NULL,
+   provider       VARCHAR(50) NOT NULL,
+   provider_id    VARCHAR(255) NOT NULL,
+   created_at     TIMESTAMP    NOT NULL DEFAULT NOW(),
+   UNIQUE(provider, provider_id),
+   CONSTRAINT fk_users_providers_user_id
+      FOREIGN KEY(user_id) 
+      REFERENCES users(id)
+);
+
 CREATE TABLE users(
    id             BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+   email          VARCHAR(100) NOT NULL,
    username       VARCHAR(20) UNIQUE     NOT NULL,
-   created_at     TIMESTAMP    NOT NULL DEFAULT NOW()
+   disabled       BOOLEAN DEFAULT FALSE,
+   created_at     TIMESTAMP    NOT NULL DEFAULT NOW(),
 );
 
 CREATE TABLE recipes(
@@ -52,10 +66,3 @@ CREATE TABLE news(
       FOREIGN KEY(author) 
       REFERENCES users(username)
 );
-
-
-CREATE TABLE app_config(
-   is_app_initialized BOOLEAN DEFAULT FALSE,
-   initialized_at TIMESTAMP DEFAULT NOW()
-);
-

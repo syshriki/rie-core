@@ -70,8 +70,8 @@ export class ConflictError extends BaseError {
 /**
  * 422 Unprocessable Entity error
  */
-export class ValidationError extends BaseError {
-  constructor(message = 'Validation error', details?: string | string[]) {
+export class UnprocessableEntityError extends BaseError {
+  constructor(message = 'Unprocessable entity', details?: string | string[]) {
     super(message, 422, details);
   }
 }
@@ -93,6 +93,6 @@ export default {
   ForbiddenError,
   NotFoundError,
   ConflictError,
-  ValidationError,
+  UnprocessableEntityError,
   InternalServerError,
 };

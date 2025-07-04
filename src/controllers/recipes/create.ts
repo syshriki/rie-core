@@ -9,7 +9,7 @@ import type { AppContext } from '../../types.ts';
 export default async (ctx: AppContext): Promise<void> => {
   const recipeData = ctx.state.validatedBody as RecipeCreateInput;
 
-  const { username } = ctx.state.user as { username: string };
+  const username = ctx.state.jwt.sub;
 
   const now = Math.floor(Date.now() / 1000);
 

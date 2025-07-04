@@ -32,7 +32,7 @@ type PostgresError = {
 export function duplicateKeyErrorHandler({ message, code, constraint }: ErrorHandlerOptions) {
   return (error: PostgresError) => {
     if (error.code === '23505' && (!constraint || error.constraint_name === constraint)) {
-      throw new errors.BadRequestError(message ?? error.detail, code);
+      throw new errors.ConflictError(message ?? error.detail, code);
     }
     throw error;
   };

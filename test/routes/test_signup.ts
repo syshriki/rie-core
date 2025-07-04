@@ -8,12 +8,12 @@ import request from 'supertest';
 import app from '../../src/app.ts';
 import { nockJwks } from '../helpers/auth.ts';
 import { reinitializeDatabase } from '../helpers/dbHelpers.ts';
+import { createUser } from '../helpers/userHelper.ts';
 import users from '../helpers/users.json' with { type: 'json' };
 
-describe('POST /api/init', () => {
+describe('POST /api/signup', () => {
   let server: Server;
 
-  // Setup server before all tests in this file
   before(async () => {
     server = await app();
     await nockJwks();
@@ -21,6 +21,7 @@ describe('POST /api/init', () => {
 
   beforeEach(async () => {
     await reinitializeDatabase();
+    await createUser(server, users.user0.token, { username: 'testuser' });
   });
 
   after(async () => {
@@ -31,7 +32,7 @@ describe('POST /api/init', () => {
 
   it('should create a new user', async () => {
     const response = await request(server)
-      .post('/api/init')
+      .post('/api/signup')
       .set('Cookie', [`auth_token=${users.user0.token}`])
       .expect(200);
 
@@ -40,19 +41,19 @@ describe('POST /api/init', () => {
     expect(response.body.createdAt).to.be.a('string');
   });
 
-  it('should not allow re-calling of init', async () => {
+  it('should not allow re-calling of signup', async () => {
     await request(server)
-      .post('/api/init')
+      .post('/api/signup')
       .set('Cookie', [`auth_token=${users.user0.token}`])
       .expect(200);
 
     await request(server)
-      .post('/api/init')
+      .post('/api/signup')
       .set('Cookie', [`auth_token=${users.user0.token}`])
-      .expect(400);
+      .expect(409);
   });
 
   it('should require auth', async () => {
-    await request(server).post('/api/init').expect(401);
+    await request(server).post('/api/signup').expect(401);
   });
 });

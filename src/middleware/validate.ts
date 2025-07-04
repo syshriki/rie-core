@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { BadRequestError } from '../errors.ts';
+import { UnprocessableEntityError } from '../errors.ts';
 import type { AppContext, ControllerFunction } from '../types.ts';
 
 /**
@@ -23,7 +23,7 @@ export function body<T extends z.ZodType>(schema: T): ControllerFunction {
       if (error instanceof z.ZodError) {
         // Format the error messages
         const details = error.errors.map((err) => `${err.path.join('.')}: ${err.message}`);
-        throw new BadRequestError('Invalid request body', details);
+        throw new UnprocessableEntityError('Invalid request body', details);
       }
       throw error;
     }
@@ -45,7 +45,7 @@ export function query<T extends z.ZodType>(schema: T): ControllerFunction {
     } catch (error) {
       if (error instanceof z.ZodError) {
         const details = error.errors.map((err) => `${err.path.join('.')}: ${err.message}`);
-        throw new BadRequestError('Invalid query parameters', details);
+        throw new UnprocessableEntityError('Invalid query parameters', details);
       }
       throw error;
     }
@@ -67,7 +67,7 @@ export function params<T extends z.ZodType>(schema: T): ControllerFunction {
     } catch (error) {
       if (error instanceof z.ZodError) {
         const details = error.errors.map((err) => `${err.path.join('.')}: ${err.message}`);
-        throw new BadRequestError('Invalid path parameters', details);
+        throw new UnprocessableEntityError('Invalid path parameters', details);
       }
       throw error;
     }
