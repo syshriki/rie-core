@@ -2,7 +2,7 @@
  * Get all news with pagination
  */
 
-import * as newsDao from '../../daos/newsDao.ts';
+import * as newsDao from '../../db/daos/newsDao.ts';
 import type { PaginationQuery } from '../../schemas/index.ts';
 import type { AppContext } from '../../types.ts';
 
@@ -11,7 +11,7 @@ export default async (ctx: AppContext): Promise<void> => {
   const { cursor, limit = 10 } = ctx.state.validatedQuery as PaginationQuery;
 
   // Get all news
-  const news = await newsDao.findAll(null, cursor, limit);
+  const news = await newsDao.findAll(cursor, limit);
 
   // Calculate pagination for next page
   const count = news.length;

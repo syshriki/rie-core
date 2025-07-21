@@ -8,7 +8,7 @@ import request from 'supertest';
 import app from '../../src/app.ts';
 import { reinitializeDatabase } from '../helpers/dbHelpers.ts';
 
-describe('GET /api/news', () => {
+describe('GET /news', () => {
   const testUsername = 'testuser';
   let server: Server;
 
@@ -27,10 +27,7 @@ describe('GET /api/news', () => {
   });
 
   it('should get all news with pagination', async () => {
-    const response = await request(server)
-      .get('/api/news')
-      .set('X-Username', testUsername)
-      .expect(200);
+    const response = await request(server).get('/news').set('X-Username', testUsername).expect(200);
 
     expect(response.body).to.have.property('news').that.is.an('array');
     expect(response.body.news).to.have.length(2);
@@ -41,7 +38,7 @@ describe('GET /api/news', () => {
   it('should support pagination with cursor', async () => {
     // First get all news to get a cursor
     const firstResponse = await request(server)
-      .get('/api/news')
+      .get('/news')
       .set('X-Username', testUsername)
       .expect(200);
 
@@ -52,7 +49,7 @@ describe('GET /api/news', () => {
 
     // Get news with cursor
     const response = await request(server)
-      .get(`/api/news?cursor=${cursor}`)
+      .get(`/news?cursor=${cursor}`)
       .set('X-Username', testUsername)
       .expect(200);
 
@@ -62,14 +59,14 @@ describe('GET /api/news', () => {
   });
 
   it('should require authentication', async () => {
-    await request(server).get('/api/news').expect(401);
+    await request(server).get('/news').expect(401);
   });
 });
 
 // Helper function to create a news item
 async function createNewsItem(title: string, server: Server) {
   await request(server)
-    .post('/api/news')
+    .post('/news')
     .set('X-Username', 'testuser')
     .send({
       title,

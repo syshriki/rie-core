@@ -2,9 +2,10 @@
  * Delete a recipe
  */
 
-import { sql } from '../../daos/db.ts';
-import * as recipeDao from '../../daos/recipeDao.ts';
-import * as recipeFavoriteDao from '../../daos/recipeFavoriteDao.ts';
+import type postgres from 'postgres';
+import { sql } from '../../db/connection.ts';
+import * as recipeDao from '../../db/daos/recipeDao.ts';
+import * as recipeFavoriteDao from '../../db/daos/recipeFavoriteDao.ts';
 import type { RecipeIdParam } from '../../schemas/recipe.ts';
 import type { AppContext, AppError } from '../../types.ts';
 
@@ -15,7 +16,7 @@ import type { AppContext, AppError } from '../../types.ts';
  */
 async function deleteRecipe(id: number, username: string): Promise<void> {
   // First verify the recipe exists and belongs to the user
-  const recipe = await recipeDao.findById(null, id);
+  const recipe = await recipeDao.findById(id);
 
   if (!recipe) {
     const error = new Error(`Recipe with ID ${id} not found`) as AppError;
@@ -30,12 +31,12 @@ async function deleteRecipe(id: number, username: string): Promise<void> {
   }
 
   // Use a transaction to delete recipe and all associated data
-  await sql.begin(async (transaction) => {
+  await sql.begin(async (transaction: postgres.Sql) => {
     // Delete any favorites for this recipe
-    await recipeFavoriteDao.deleteByRecipeId(transaction, id);
+    await recipeFavoriteDao.deleteByRecipeId(id, transaction);
 
     // Finally delete the recipe itself
-    const deleted = await recipeDao.deleteRecipe(transaction, id);
+    const deleted = await recipeDao.deleteRecipe(id, transaction);
 
     if (!deleted) {
       throw new Error(`Failed to delete recipe with ID ${id}`);

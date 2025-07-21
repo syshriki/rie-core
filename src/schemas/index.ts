@@ -2,7 +2,7 @@
  * Root schema export file that consolidates all schemas
  */
 
-import { z } from 'zod';
+import * as z from 'zod/v4';
 import newsSchemas from './news.ts';
 import recipeSchemas from './recipe.ts';
 import recipeFavoriteSchemas from './recipeFavorite.ts';

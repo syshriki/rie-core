@@ -17,7 +17,7 @@ interface RecipeData {
   [key: string]: unknown;
 }
 
-describe('DELETE /api/recipes/:id', () => {
+describe('DELETE /recipes/:id', () => {
   let server: Server;
   const testUsername = 'testuser';
   const testRecipe: RecipeData = {
@@ -46,13 +46,13 @@ describe('DELETE /api/recipes/:id', () => {
 
     // Create test user directly in the test
     const userResponse = await request(server)
-      .post('/api/users')
+      .post('/users')
       .send({ username: testUsername })
       .expect(201);
 
     // Create a test recipe directly in the test
     const recipeResponse = await request(server)
-      .post('/api/recipes')
+      .post('/recipes')
       .set('X-Username', testUsername)
       .send(testRecipe)
       .expect(201);
@@ -63,22 +63,19 @@ describe('DELETE /api/recipes/:id', () => {
   it('should delete a recipe', async () => {
     // Delete the recipe
     await request(server)
-      .delete(`/api/recipes/${recipeId}`)
+      .delete(`/recipes/${recipeId}`)
       .set('X-Username', testUsername)
       .expect(204);
 
     // Verify it's deleted by trying to fetch it
-    await request(server)
-      .get(`/api/recipes/${recipeId}`)
-      .set('X-Username', testUsername)
-      .expect(404);
+    await request(server).get(`/recipes/${recipeId}`).set('X-Username', testUsername).expect(404);
   });
 
   it('should return 404 for non-existent recipe', async () => {
     const nonExistentId = 9999;
 
     await request(server)
-      .delete(`/api/recipes/${nonExistentId}`)
+      .delete(`/recipes/${nonExistentId}`)
       .set('X-Username', testUsername)
       .expect(404);
   });
@@ -86,17 +83,17 @@ describe('DELETE /api/recipes/:id', () => {
   it('should not allow deleting recipes created by others', async () => {
     // Create another user
     const otherUsername = 'otheruser';
-    await request(server).post('/api/users').send({ username: otherUsername }).expect(201);
+    await request(server).post('/users').send({ username: otherUsername }).expect(201);
 
     // Try to delete as different user
     await request(server)
-      .delete(`/api/recipes/${recipeId}`)
+      .delete(`/recipes/${recipeId}`)
       .set('X-Username', otherUsername)
       .expect(403);
 
     // Verify recipe still exists
     const response = await request(server)
-      .get(`/api/recipes/${recipeId}`)
+      .get(`/recipes/${recipeId}`)
       .set('X-Username', testUsername)
       .expect(200);
 

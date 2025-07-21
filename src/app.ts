@@ -3,28 +3,44 @@ import cors from '@koa/cors';
 import config from 'config';
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
-import logger from 'koa-pino-logger';
+import reqLogger from 'koa-pino-logger';
 import serve from 'koa-static';
-import { sql } from './daos/db.ts';
+import { pino } from 'pino';
+import { createSqlClient } from './db/connection.ts';
 import errorHandler from './middleware/errorHandler.ts';
 import router from './routes.ts';
-
 import initializeErrorHandler from './zodConfig.ts';
+
+const logger = pino();
 
 initializeErrorHandler();
 
-
 const createApp = async (): Promise<http.Server> => {
   const app = new Koa({ proxy: true });
+  const sqlClient = await createSqlClient();
 
-  app.use(logger({
-    level: config.get<string>('logging.level'),
-    useLevelLabels: true,
-    redact: {
-      paths: ['req', 'res', 'pid'],
-      remove: true
-    }
-  }));
+  app.use(
+    reqLogger({
+      level: config.get<pino.LevelWithSilent>('logging.level'),
+      serializers: {
+        req: (req) => {
+          return {
+            url: req.url,
+            method: req.method,
+          };
+        },
+        res: (res) => {
+          return {
+            statusCode: res.statusCode,
+          };
+        },
+      },
+      redact: {
+        paths: ['pid'],
+        remove: true,
+      },
+    }),
+  );
   app.use(cors({ credentials: true }));
   app.use(errorHandler);
   app.use(bodyParser());
@@ -37,22 +53,22 @@ const createApp = async (): Promise<http.Server> => {
     const server = app.listen(port);
 
     server.on('listening', () => {
-      console.log(`${process.env.NODE_ENV} server running on port ${port}`);
+      logger.info(`${process.env.NODE_ENV} server running on port ${port}`);
     });
 
     server.on('close', async () => {
-      console.log('Server closed, cleaning up...');
-      await sql.end({ timeout: 5 });
-      console.log('Database connections closed');
+      logger.info('Server closed, cleaning up...');
+      await sqlClient.end({ timeout: 5 });
+      logger.info('Database connections closed');
     });
 
     const shutdown = async () => {
-      console.log('Graceful shutdown initiated');
+      logger.info('Graceful shutdown initiated');
       try {
         await server.close();
         process.exit(0);
       } catch (err) {
-        console.log('Error during shutdown:', err);
+        logger.info('Error during shutdown:', err);
         process.exit(1);
       }
     };

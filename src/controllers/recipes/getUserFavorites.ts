@@ -2,7 +2,7 @@
  * Get user's favorite recipes
  */
 
-import * as recipeFavoriteDao from '../../daos/recipeFavoriteDao.ts';
+import * as recipeFavoriteDao from '../../db/daos/recipeFavoriteDao.ts';
 import type { PaginationQuery } from '../../schemas/index.ts';
 import type { AppContext } from '../../types.ts';
 
@@ -14,7 +14,7 @@ export default async (ctx: AppContext): Promise<void> => {
   // For authenticated endpoints, ctx.state.user is guaranteed to be defined by auth middleware
   const { username } = ctx.state.user as { username: string };
 
-  const recipes = await recipeFavoriteDao.getFavorites(null, username, cursor || null, limit);
+  const recipes = await recipeFavoriteDao.getFavorites(username, cursor || null, limit);
 
   // Calculate pagination for next page
   const count = recipes.length;

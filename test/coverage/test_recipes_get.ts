@@ -8,7 +8,7 @@ import request from 'supertest';
 import app from '../../src/app.ts';
 import { reinitializeDatabase } from '../helpers/dbHelpers.ts';
 
-describe('GET /api/recipes', () => {
+describe('GET /recipes', () => {
   let server: Server;
   const testUsername = 'testuser';
   const testRecipe = {
@@ -36,7 +36,7 @@ describe('GET /api/recipes', () => {
     // Get the await request(server) instance after server setup
     // Create some test recipes
     await request(server)
-      .post('/api/recipes')
+      .post('/recipes')
       .set('X-Username', testUsername)
       .send({
         ...testRecipe,
@@ -44,7 +44,7 @@ describe('GET /api/recipes', () => {
       });
 
     await request(server)
-      .post('/api/recipes')
+      .post('/recipes')
       .set('X-Username', testUsername)
       .send({
         ...testRecipe,
@@ -54,7 +54,7 @@ describe('GET /api/recipes', () => {
 
   it('should get all recipes with pagination', async () => {
     const response = await request(server)
-      .get('/api/recipes')
+      .get('/recipes')
       .set('X-Username', testUsername)
       .expect(200);
 
@@ -66,7 +66,7 @@ describe('GET /api/recipes', () => {
 
   it('should filter recipes by search term', async () => {
     const response = await request(server)
-      .get('/api/recipes?q=Recipe 1')
+      .get('/recipes?q=Recipe 1')
       .set('X-Username', testUsername)
       .expect(200);
 

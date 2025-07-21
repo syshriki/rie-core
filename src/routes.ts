@@ -1,8 +1,7 @@
 import Router from 'koa-router';
-import * as validate from './middleware/validate.ts';
 import { paginationSchema } from './schemas/index.ts';
 
-import userCreateController from './controllers/users/create.ts';
+import userCreateController from './controllers/users/create/index.ts';
 import userGetOneController from './controllers/users/getOne.ts';
 
 import recipeAddFavoriteController from './controllers/recipes/addFavorite.ts';
@@ -16,9 +15,9 @@ import recipeUpdateController from './controllers/recipes/update.ts';
 
 import newsGetAllController from './controllers/news/getAll.ts';
 import newsGetByRecipeController from './controllers/news/getByRecipe.ts';
+import validateRequest from './middleware/validateRequest.ts';
 
-import initController from './controllers/signup/index.ts';
-import auth from './middleware/auth.ts';
+import { createAuthMiddleware } from './middleware/auth.ts';
 import {
   recipeCreateInputSchema,
   recipeIdParamSchema,
@@ -27,54 +26,68 @@ import {
 } from './schemas/recipe.ts';
 import { userCreateInputSchema } from './schemas/user.ts';
 
-const routerProtected = new Router({ prefix: '/api' });
-const routerUnprotected = new Router({ prefix: '/api' });
+const router = new Router({});
 
-routerProtected.use(auth);
+const withCookieAuth = createAuthMiddleware({});
+const withBearerAuth = createAuthMiddleware({ useAuthorizationHeader: true });
 
-routerProtected.post('/signup', initController);
-routerProtected.post('/users', validate.body(userCreateInputSchema), userCreateController);
-routerProtected.get('/users/:username', userGetOneController);
-routerProtected.get('/recipes', validate.query(recipeSearchQuerySchema), recipeGetAllController);
-routerProtected.get('/recipes/:id', validate.params(recipeIdParamSchema), recipeGetOneController);
-routerProtected.post('/recipes', validate.body(recipeCreateInputSchema), recipeCreateController);
-routerProtected.put(
+router.post('/users', withBearerAuth, userCreateController);
+router.get('/users/:username', withCookieAuth, userGetOneController);
+router.get(
+  '/recipes',
+  withCookieAuth,
+  validateRequest({ query: recipeSearchQuerySchema }),
+  recipeGetAllController,
+);
+router.get(
   '/recipes/:id',
-  validate.params(recipeIdParamSchema),
-  validate.body(recipeUpdateInputSchema),
+  withCookieAuth,
+  validateRequest({ params: recipeIdParamSchema }),
+  recipeGetOneController,
+);
+router.post(
+  '/recipes',
+  withCookieAuth,
+  validateRequest({ body: recipeCreateInputSchema }),
+  recipeCreateController,
+);
+router.put(
+  '/recipes/:id',
+  withCookieAuth,
+  validateRequest({ params: recipeIdParamSchema, body: recipeUpdateInputSchema }),
   recipeUpdateController,
 );
-routerProtected.delete(
+router.delete(
   '/recipes/:id',
-  validate.params(recipeIdParamSchema),
+  withCookieAuth,
+  validateRequest({ params: recipeIdParamSchema }),
   recipeDeleteController,
 );
 
-routerProtected.post(
+router.post(
   '/recipes/:id/favorite',
-  validate.params(recipeIdParamSchema),
+  withCookieAuth,
+  validateRequest({ params: recipeIdParamSchema }),
   recipeAddFavoriteController,
 );
-routerProtected.delete(
+router.delete(
   '/recipes/:id/favorite',
-  validate.params(recipeIdParamSchema),
+  withCookieAuth,
+  validateRequest({ params: recipeIdParamSchema }),
   recipeRemoveFavoriteController,
 );
-routerProtected.get(
+router.get(
   '/recipes/favorites',
-  validate.query(paginationSchema),
+  withCookieAuth,
+  validateRequest({ query: paginationSchema }),
   recipeFavoritesController,
 );
-routerProtected.get('/news', validate.query(paginationSchema), newsGetAllController);
-routerProtected.get(
+router.get('/news', validateRequest({ query: paginationSchema }), newsGetAllController);
+router.get(
   '/recipes/:id/news',
-  validate.params(recipeIdParamSchema),
-  validate.query(paginationSchema),
+  withCookieAuth,
+  validateRequest({ params: recipeIdParamSchema, query: paginationSchema }),
   newsGetByRecipeController,
 );
 
-const combinedRouter = new Router();
-combinedRouter.use(routerProtected.routes(), routerProtected.allowedMethods());
-combinedRouter.use(routerUnprotected.routes(), routerUnprotected.allowedMethods());
-
-export default combinedRouter;
+export default router;

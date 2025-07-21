@@ -11,7 +11,7 @@ import { reinitializeDatabase } from '../helpers/dbHelpers.ts';
 import { createUser } from '../helpers/userHelper.ts';
 import users from '../helpers/users.json' with { type: 'json' };
 
-describe('GET /api/users/:username', () => {
+describe('GET /users/:username', () => {
   let server: Server;
   const testUsername = 'testuser';
 
@@ -33,7 +33,7 @@ describe('GET /api/users/:username', () => {
 
   it('should get user by username', async () => {
     const response = await request(server)
-      .get(`/api/users/${testUsername}`)
+      .get(`/users/${testUsername}`)
       .set('Cookie', [`auth_token=${users.user0.token}`])
       .expect(200);
 
@@ -45,12 +45,12 @@ describe('GET /api/users/:username', () => {
     const nonExistentUsername = 'nonexistentuser';
 
     await request(server)
-      .get(`/api/users/${nonExistentUsername}`)
+      .get(`/users/${nonExistentUsername}`)
       .set('Cookie', [`auth_token=${users.user0.token}`])
       .expect(404);
   });
 
   it('should require authentication', async () => {
-    await request(server).get(`/api/users/${testUsername}`).expect(401);
+    await request(server).get(`/users/${testUsername}`).expect(401);
   });
 });

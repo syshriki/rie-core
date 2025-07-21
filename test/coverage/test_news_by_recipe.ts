@@ -8,7 +8,7 @@ import request from 'supertest';
 import app from '../../src/app.ts';
 import { reinitializeDatabase } from '../helpers/dbHelpers.ts';
 
-describe('GET /api/recipes/:id/news', () => {
+describe('GET /recipes/:id/news', () => {
   let server: Server;
   const testUsername = 'testuser';
   const testRecipe = {
@@ -31,7 +31,7 @@ describe('GET /api/recipes/:id/news', () => {
 
   async function createNewsItem(title: string, recipeId: number | null) {
     await request(server)
-      .post('/api/news')
+      .post('/news')
       .set('X-Username', testUsername)
       .send({
         title,
@@ -44,11 +44,11 @@ describe('GET /api/recipes/:id/news', () => {
   beforeEach(async () => {
     await reinitializeDatabase();
 
-    await request(server).post('/api/users').send({ username: testUsername }).expect(201);
+    await request(server).post('/users').send({ username: testUsername }).expect(201);
 
     // Create a test recipe
     const recipeResponse = await request(server)
-      .post('/api/recipes')
+      .post('/recipes')
       .set('X-Username', testUsername)
       .send(testRecipe)
       .expect(201);
@@ -66,7 +66,7 @@ describe('GET /api/recipes/:id/news', () => {
 
   it('should get news for a specific recipe', async () => {
     const response = await request(server)
-      .get(`/api/recipes/${recipeId}/news`)
+      .get(`/recipes/${recipeId}/news`)
       .set('X-Username', testUsername)
       .expect(200);
 
@@ -79,7 +79,7 @@ describe('GET /api/recipes/:id/news', () => {
   it('should return empty array for recipe with no news', async () => {
     // Create a new recipe with no news
     const newRecipeResponse = await request(server)
-      .post('/api/recipes')
+      .post('/recipes')
       .set('X-Username', testUsername)
       .send({
         ...testRecipe,
@@ -90,7 +90,7 @@ describe('GET /api/recipes/:id/news', () => {
     const newRecipeId = newRecipeResponse.body.id;
 
     const response = await request(server)
-      .get(`/api/recipes/${newRecipeId}/news`)
+      .get(`/recipes/${newRecipeId}/news`)
       .set('X-Username', testUsername)
       .expect(200);
 
@@ -102,7 +102,7 @@ describe('GET /api/recipes/:id/news', () => {
     const nonExistentId = 9999;
 
     await request(server)
-      .get(`/api/recipes/${nonExistentId}/news`)
+      .get(`/recipes/${nonExistentId}/news`)
       .set('X-Username', testUsername)
       .expect(404);
   });

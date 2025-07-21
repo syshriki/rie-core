@@ -2,7 +2,7 @@
  * Create a new recipe
  */
 
-import * as recipeDao from '../../daos/recipeDao.ts';
+import * as recipeDao from '../../db/daos/recipeDao.ts';
 import type { RecipeCreateInput } from '../../schemas/recipe.ts';
 import type { AppContext } from '../../types.ts';
 
@@ -13,7 +13,7 @@ export default async (ctx: AppContext): Promise<void> => {
 
   const now = Math.floor(Date.now() / 1000);
 
-  const recipe = await recipeDao.create(null, {
+  const recipe = await recipeDao.create({
     username,
     title: recipeData.title,
     description: recipeData.description,

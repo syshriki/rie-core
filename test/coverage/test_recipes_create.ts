@@ -7,7 +7,7 @@ import { reinitializeDatabase } from '../helpers/dbHelpers.ts';
 import { createUser } from '../helpers/userHelper.ts';
 import users from '../helpers/users.json' with { type: 'json' };
 
-describe('POST /api/recipes', () => {
+describe('POST /recipes', () => {
   let server: Server;
   const testUsername = 'testuser';
   const testRecipe = {
@@ -35,7 +35,7 @@ describe('POST /api/recipes', () => {
 
   it('should create a new recipe', async () => {
     const response = await request(server)
-      .post('/api/recipes')
+      .post('/recipes')
       .set('Cookie', [`auth_token=${users.user0.token}`])
       .send(testRecipe)
       .expect(201);
@@ -53,14 +53,14 @@ describe('POST /api/recipes', () => {
 
   it('should require a valid username', async () => {
     await request(server)
-      .post('/api/recipes')
+      .post('/recipes')
       .send(testRecipe) // Missing username header
       .expect(400); // Should fail with a 400 status
   });
 
   it('should require recipe data', async () => {
     await request(server)
-      .post('/api/recipes')
+      .post('/recipes')
       .set('X-Username', testUsername)
       .send({}) // Empty recipe data
       .expect(400); // Should fail with validation error

@@ -36,11 +36,11 @@ describe('Recipe favorites endpoints', () => {
     await reinitializeDatabase();
 
     // Create test user directly in the test
-    await request(server).post('/api/users').send({ username: testUsername }).expect(201);
+    await request(server).post('/users').send({ username: testUsername }).expect(201);
 
     // Create a test recipe
     const response = await request(server)
-      .post('/api/recipes')
+      .post('/recipes')
       .set('X-Username', testUsername)
       .send(testRecipe)
       .expect(201);
@@ -48,10 +48,10 @@ describe('Recipe favorites endpoints', () => {
     recipeId = response.body.id;
   });
 
-  describe('POST /api/recipes/:id/favorite', () => {
+  describe('POST /recipes/:id/favorite', () => {
     it('should add a recipe to favorites', async () => {
       const response = await request(server)
-        .post(`/api/recipes/${recipeId}/favorite`)
+        .post(`/recipes/${recipeId}/favorite`)
         .set('X-Username', testUsername)
         .expect(201);
 
@@ -60,64 +60,64 @@ describe('Recipe favorites endpoints', () => {
     });
 
     it('should require authentication', async () => {
-      await request(server).post(`/api/recipes/${recipeId}/favorite`).expect(401);
+      await request(server).post(`/recipes/${recipeId}/favorite`).expect(401);
     });
 
     it('should return conflict if already favorited', async () => {
       // First favorite
       await request(server)
-        .post(`/api/recipes/${recipeId}/favorite`)
+        .post(`/recipes/${recipeId}/favorite`)
         .set('X-Username', testUsername)
         .expect(201);
 
       // Try to favorite again
       await request(server)
-        .post(`/api/recipes/${recipeId}/favorite`)
+        .post(`/recipes/${recipeId}/favorite`)
         .set('X-Username', testUsername)
         .expect(409);
     });
   });
 
-  describe('DELETE /api/recipes/:id/favorite', () => {
+  describe('DELETE /recipes/:id/favorite', () => {
     it('should remove a recipe from favorites', async () => {
       // First add to favorites
       await request(server)
-        .post(`/api/recipes/${recipeId}/favorite`)
+        .post(`/recipes/${recipeId}/favorite`)
         .set('X-Username', testUsername)
         .expect(201);
 
       // Then remove from favorites
       await request(server)
-        .delete(`/api/recipes/${recipeId}/favorite`)
+        .delete(`/recipes/${recipeId}/favorite`)
         .set('X-Username', testUsername)
         .expect(204);
 
       // Verify it's removed by trying to add it again
       await request(server)
-        .post(`/api/recipes/${recipeId}/favorite`)
+        .post(`/recipes/${recipeId}/favorite`)
         .set('X-Username', testUsername)
         .expect(201);
     });
 
     it('should return 404 if recipe was not favorited', async () => {
       await request(server)
-        .delete(`/api/recipes/${recipeId}/favorite`)
+        .delete(`/recipes/${recipeId}/favorite`)
         .set('X-Username', testUsername)
         .expect(404);
     });
   });
 
-  describe('GET /api/users/:username/favorites', () => {
+  describe('GET /users/:username/favorites', () => {
     it('should return user favorites', async () => {
       // Add recipe to favorites
       await request(server)
-        .post(`/api/recipes/${recipeId}/favorite`)
+        .post(`/recipes/${recipeId}/favorite`)
         .set('X-Username', testUsername)
         .expect(201);
 
       // Get favorites
       const response = await request(server)
-        .get(`/api/users/${testUsername}/favorites`)
+        .get(`/users/${testUsername}/favorites`)
         .set('X-Username', testUsername)
         .expect(200);
 

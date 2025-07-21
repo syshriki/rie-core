@@ -2,7 +2,7 @@
  * Update an existing recipe
  */
 
-import * as recipeDao from '../../daos/recipeDao.ts';
+import * as recipeDao from '../../db/daos/recipeDao.ts';
 import type { RecipeEntity, RecipeIdParam, RecipeUpdateInput } from '../../schemas/recipe.ts';
 import type { AppContext, AppError } from '../../types.ts';
 
@@ -15,10 +15,10 @@ import type { AppContext, AppError } from '../../types.ts';
 async function updateRecipe(
   id: number,
   username: string,
-  recipeData: RecipeUpdateInput
+  recipeData: RecipeUpdateInput,
 ): Promise<RecipeEntity> {
   // First verify the recipe exists and belongs to the user
-  const recipe = await recipeDao.findById(null, id);
+  const recipe = await recipeDao.findById(id);
 
   if (!recipe) {
     const error = new Error(`Recipe with ID ${id} not found`) as AppError;
@@ -32,7 +32,7 @@ async function updateRecipe(
     throw error;
   }
 
-  const updatedRecipe = await recipeDao.update(null, id, recipeData);
+  const updatedRecipe = await recipeDao.update(id, recipeData);
 
   if (!updatedRecipe) {
     const error = new Error(`Failed to update recipe with ID ${id}`) as AppError;

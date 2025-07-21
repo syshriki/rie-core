@@ -1,7 +1,8 @@
 {
     "package": "./package.json",
     "timeout": 5000,
-    "spec": "test/**/*.ts",
+    "spec": "tests/**/*.ts",
     "recursive": true,
-    "bail": true
+    "bail": true,
+    "parallel": false
 }

@@ -2,9 +2,9 @@
  * Get news related to a specific recipe
  */
 
-import * as newsDao from '../../daos/newsDao.ts';
-import * as recipeDao from '../../daos/recipeDao.ts';
-import errors from '../../errors.ts';
+import * as newsDao from '../../db/daos/newsDao.ts';
+import * as recipeDao from '../../db/daos/recipeDao.ts';
+import errors from '../../httpErrors.ts';
 import type { PaginationQuery } from '../../schemas/index.ts';
 import type { RecipeIdParam } from '../../schemas/recipe.ts';
 import type { AppContext } from '../../types.ts';
@@ -16,13 +16,13 @@ export default async (ctx: AppContext): Promise<void> => {
   // Get pagination parameters from validated query
   const { cursor, limit = 10 } = ctx.state.validatedQuery as PaginationQuery;
 
-  const recipe = await recipeDao.findById(null, id);
+  const recipe = await recipeDao.findById(id);
 
   if (!recipe) {
     throw new errors.BadRequestError(`Recipe with ID ${id} not found`);
   }
 
-  const news = await newsDao.findByRecipeId(null, id, cursor, limit);
+  const news = await newsDao.findByRecipeId(id, cursor, limit);
 
   // Calculate pagination for next page
   const count = news.length;

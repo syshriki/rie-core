@@ -2,7 +2,7 @@
  * Schema definitions for recipe favorite-related data
  */
 
-import { z } from 'zod';
+import * as z from 'zod/v4';
 import { recipeOutputSchema } from './recipe.ts';
 
 // Output schema for database recipe favorite entity

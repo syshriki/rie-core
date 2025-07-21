@@ -1,8 +1,4 @@
-/**
- * Schema definitions for recipe-related data
- */
-
-import { z } from 'zod';
+import * as z from 'zod/v4';
 
 // Base recipe schema
 const recipeBaseSchema = z.object({
@@ -50,7 +46,6 @@ export const recipeSearchQuerySchema = z.object({
   limit: z.coerce.number().int().positive().default(10).optional(),
 });
 
-// Infer TypeScript types from schemas
 export type RecipeEntity = z.infer<typeof recipeEntitySchema>;
 export type RecipeCreateInput = z.infer<typeof recipeCreateInputSchema>;
 export type RecipeUpdateInput = z.infer<typeof recipeUpdateInputSchema>;

@@ -1,10 +1,10 @@
-import * as userDao from '../../daos/userDao.ts';
-import errors from '../../errors.ts';
+import * as userDao from '../../db/daos/userDao.ts';
+import errors from '../../httpErrors.ts';
 import type { UserEntity } from '../../schemas/user.ts';
 import type { AppContext } from '../../types.ts';
 
 async function findOrThrow(username: string): Promise<UserEntity> {
-  const user = await userDao.findByUsername(null, username);
+  const user = await userDao.findByUsername(username);
 
   if (!user) {
     throw new errors.NotFoundError(`user with username ${username} not found`);

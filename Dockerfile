@@ -1,36 +1,17 @@
-FROM node:18-alpine as builder
+FROM node:24-alpine
 
-WORKDIR /app
-
-# Copy package.json and package-lock.json
-COPY package*.json ./
-
-# Install all dependencies (including dev dependencies)
-RUN npm ci
-
-# Copy source code
-COPY . .
-
-# Build TypeScript
-RUN npm run build
-
-# Production image
-FROM node:18-alpine
-
-WORKDIR /app
+WORKDIR /opt/rie-server
 
 # Copy package.json and package-lock.json
-COPY package*.json ./
+COPY ./ ./
 
 # Install only production dependencies
 RUN npm ci --only=production
 
-# Copy built TypeScript files
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/config ./config
-
 ENV NODE_ENV=production
 
-EXPOSE 3000
+EXPOSE 8001
 
-CMD ["node", "dist/server.js"]
+# Execute commands directly in the ENTRYPOINT
+ENTRYPOINT export DB_PASSWORD=$(cat /run/secrets/pg_password 2>/dev/null || echo ""); \
+           npm run prod

@@ -5,7 +5,7 @@ export interface AppState {
   user?: {
     username: string;
   };
-  jwt?: {
+  jwt: {
     sub: string; // Subject (user ID)
     iat: number; // Issued at
     exp: number; // Expiration time

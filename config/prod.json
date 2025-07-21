@@ -1,14 +1,13 @@
 {
     "server": {
-        "port": 3000,
+        "port": 8001,
         "host": "0.0.0.0"
     },
     "db": {
         "host": "localhost",
         "port": 5432,
         "database": "rie",
-        "user": "postgres",
-        "password": "postgres"
+        "user": "rie-server"
     },
     "logging": {
         "level": "debug"

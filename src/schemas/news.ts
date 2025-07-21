@@ -2,7 +2,7 @@
  * Schema definitions for news-related data
  */
 
-import { z } from 'zod';
+import * as z from 'zod/v4';
 
 // Base news schema
 const newsBaseSchema = z.object({

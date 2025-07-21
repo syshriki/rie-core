@@ -6,7 +6,7 @@
     "db": {
         "host": "localhost",
         "port": 5432,
-        "database": "rie",
+        "database": "rie_test",
         "user": "postgres",
         "password": "postgres"
     },

@@ -2,9 +2,9 @@
  * Get all recipes with pagination and search
  */
 
-import * as recipeDao from '../../daos/recipeDao.ts';
-import * as recipeFavoriteDao from '../../daos/recipeFavoriteDao.ts';
-import * as userDao from '../../daos/userDao.ts';
+import * as recipeDao from '../../db/daos/recipeDao.ts';
+import * as recipeFavoriteDao from '../../db/daos/recipeFavoriteDao.ts';
+import * as userDao from '../../db/daos/userDao.ts';
 import type { RecipeEntity, RecipeSearchQuery } from '../../schemas/recipe.ts';
 import type { AppContext, AppError } from '../../types.ts';
 
@@ -13,7 +13,7 @@ import type { AppContext, AppError } from '../../types.ts';
  * @param username - Username
  */
 async function findOrThrow(username: string) {
-  const user = await userDao.findByUsername(null, username);
+  const user = await userDao.findByUsername(username);
 
   if (!user) {
     const error = new Error(`User with username ${username} not found`) as AppError;
@@ -35,13 +35,13 @@ async function searchRecipes(
   searchTerm: string,
   username: string,
   cursor: number | null = null,
-  limit = 10
+  limit = 10,
 ): Promise<{
   recipes: RecipeEntity[];
   hasMore: boolean;
   nextCursor: number | null;
 }> {
-  const recipes = await recipeDao.search(null, searchTerm, cursor, limit + 1);
+  const recipes = await recipeDao.search(searchTerm, cursor, limit + 1);
 
   // Check if there are more results
   const hasMore = recipes.length > limit;
@@ -55,7 +55,7 @@ async function searchRecipes(
   // Get favorite status for each recipe and ensure correct data types
   const recipesWithFavorite = await Promise.all(
     recipes.map(async (recipe) => {
-      const isFavorite = await recipeFavoriteDao.isFavorite(null, username, recipe.id);
+      const isFavorite = await recipeFavoriteDao.isFavorite(username, recipe.id);
 
       // Ensure ingredients and instructions are properly parsed as arrays
       const ingredients =
@@ -74,7 +74,7 @@ async function searchRecipes(
         instructions,
         isFavorite,
       };
-    })
+    }),
   );
 
   return {

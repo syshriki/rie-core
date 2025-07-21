@@ -2,8 +2,8 @@
  * Remove a recipe from user's favorites
  */
 
-import * as recipeFavoriteDao from '../../daos/recipeFavoriteDao.ts';
-import errors from '../../errors.ts';
+import * as recipeFavoriteDao from '../../db/daos/recipeFavoriteDao.ts';
+import errors from '../../httpErrors.ts';
 import type { RecipeIdParam } from '../../schemas/recipe.ts';
 import type { AppContext } from '../../types.ts';
 
@@ -16,7 +16,7 @@ export default async (ctx: AppContext): Promise<void> => {
   const { username } = ctx.state.user as { username: string };
 
   // Remove from favorites
-  const removed = await recipeFavoriteDao.removeFavorite(null, username, id);
+  const removed = await recipeFavoriteDao.removeFavorite(username, id);
 
   if (!removed) {
     throw new errors.BadRequestError(`failed to remove favorite ${id}`);

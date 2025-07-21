@@ -2,23 +2,23 @@
  * Get a single recipe by ID
  */
 
-import * as recipeDao from '../../daos/recipeDao.ts';
-import * as recipeFavoriteDao from '../../daos/recipeFavoriteDao.ts';
-import errors from '../../errors.ts';
+import * as recipeDao from '../../db/daos/recipeDao.ts';
+import * as recipeFavoriteDao from '../../db/daos/recipeFavoriteDao.ts';
+import errors from '../../httpErrors.ts';
 import type { RecipeEntity, RecipeIdParam } from '../../schemas/recipe.ts';
 import type { AppContext } from '../../types.ts';
 
 export async function getRecipeById(
   id: number,
-  username: string
+  username: string,
 ): Promise<RecipeEntity & { isFavorite: boolean }> {
-  const recipe = await recipeDao.findById(null, id);
+  const recipe = await recipeDao.findById(id);
 
   if (!recipe) {
     throw new errors.BadRequestError(`Recipe with ID ${id} not found`);
   }
 
-  const isFavorite = await recipeFavoriteDao.isFavorite(null, username, id);
+  const isFavorite = await recipeFavoriteDao.isFavorite(username, id);
 
   return {
     ...recipe,
