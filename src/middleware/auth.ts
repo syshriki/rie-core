@@ -17,7 +17,7 @@ function getTokenFromHeader(ctx: Context): string | undefined {
 }
 
 function getTokenFromCookie(ctx: Context): string | undefined {
-  return ctx.cookies.get('auth_token');
+  return ctx.cookies.get('access_token');
 }
 
 export function createAuthMiddleware(options: AuthOptions = {}) {
@@ -32,7 +32,7 @@ export function createAuthMiddleware(options: AuthOptions = {}) {
         401,
         options.useAuthorizationHeader
           ? 'Authorization header with Bearer token is required'
-          : 'auth_token is required',
+          : 'access_token is required',
       );
 
       const { payload } = await jose.jwtVerify(token, JWKS, {

@@ -34,7 +34,7 @@ describe('POST /users', () => {
     mathRandomStub?.restore();
   });
 
-  it('should create a new user', async () => {
+  it('should 200 with valid un-registered sub in bearer', async () => {
     const { body } = await request(server)
       .post('/users')
       .set('Authorization', `Bearer ${users.user0.token}`)
@@ -42,10 +42,11 @@ describe('POST /users', () => {
       .expect(200);
 
     expect(body).to.have.property('id', 0);
+    expect(body).to.have.property('username').that.is.a('string');
     expect(body).to.have.property('createdAt').that.is.a('string');
   });
 
-  it('should return 409 Conflict if user id already used', async () => {
+  it('should 409 Conflict if user id already used', async () => {
     await request(server)
       .post('/users')
       .set('Authorization', `Bearer ${users.user0.token}`)
@@ -57,7 +58,7 @@ describe('POST /users', () => {
       .expect(409);
   });
 
-  it('should return 500 after 5 username generation attempts', async () => {
+  it('should 500 after 5 username generation attempts', async () => {
     mathRandomStub = sinon.stub(Math, 'random').returns(0);
 
     await request(server)

@@ -5,7 +5,7 @@ import userCreateController from './controllers/users/create/index.ts';
 import userGetOneController from './controllers/users/getOne.ts';
 
 import recipeAddFavoriteController from './controllers/recipes/addFavorite.ts';
-import recipeCreateController from './controllers/recipes/create.ts';
+import recipeCreateController from './controllers/recipes/create/index.ts';
 import recipeDeleteController from './controllers/recipes/delete.ts';
 import recipeGetAllController from './controllers/recipes/getAll.ts';
 import recipeGetOneController from './controllers/recipes/getOne.ts';
@@ -17,9 +17,9 @@ import newsGetAllController from './controllers/news/getAll.ts';
 import newsGetByRecipeController from './controllers/news/getByRecipe.ts';
 import validateRequest from './middleware/validateRequest.ts';
 
+import { createRecipeBody } from './controllers/recipes/create/schema.ts';
 import { createAuthMiddleware } from './middleware/auth.ts';
 import {
-  recipeCreateInputSchema,
   recipeIdParamSchema,
   recipeSearchQuerySchema,
   recipeUpdateInputSchema,
@@ -33,6 +33,14 @@ const withBearerAuth = createAuthMiddleware({ useAuthorizationHeader: true });
 
 router.post('/users', withBearerAuth, userCreateController);
 router.get('/users/:username', withCookieAuth, userGetOneController);
+
+router.post(
+  '/recipes',
+  withCookieAuth,
+  validateRequest({ body: createRecipeBody }),
+  recipeCreateController,
+);
+
 router.get(
   '/recipes',
   withCookieAuth,
@@ -44,12 +52,6 @@ router.get(
   withCookieAuth,
   validateRequest({ params: recipeIdParamSchema }),
   recipeGetOneController,
-);
-router.post(
-  '/recipes',
-  withCookieAuth,
-  validateRequest({ body: recipeCreateInputSchema }),
-  recipeCreateController,
 );
 router.put(
   '/recipes/:id',

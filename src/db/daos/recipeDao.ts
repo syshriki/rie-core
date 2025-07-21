@@ -1,16 +1,16 @@
 import type postgres from 'postgres';
 
-import type { RecipeEntity } from '../../schemas/recipe.ts';
+import type { CreateRecipeInput, RecipeEntity } from '../../schemas/recipe.ts';
 import { sql as defaultSql } from '../connection.ts';
 
-type RawRecipeEntity = Omit<RecipeEntity, 'ingredients' | 'instructions'> & {
+type RawRecipeEntity = CreateRecipeInput & {
   ingredients: string | unknown[];
   instructions: string | unknown[];
   isFavorite?: boolean;
 };
 
 export const create = async (
-  recipe: Omit<RecipeEntity, 'id'>,
+  recipe: CreateRecipeInput,
   sql: postgres.Sql = defaultSql,
 ): Promise<RecipeEntity> => {
   const [createdRecipe] = await sql<RecipeEntity[]>`

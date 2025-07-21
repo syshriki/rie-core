@@ -4,7 +4,6 @@ import config from 'config';
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import reqLogger from 'koa-pino-logger';
-import serve from 'koa-static';
 import { pino } from 'pino';
 import { createSqlClient } from './db/connection.ts';
 import errorHandler from './middleware/errorHandler.ts';
@@ -44,7 +43,6 @@ const createApp = async (): Promise<http.Server> => {
   app.use(cors({ credentials: true }));
   app.use(errorHandler);
   app.use(bodyParser());
-  app.use(serve('./static'));
   app.use(router.routes());
   app.use(router.allowedMethods());
 

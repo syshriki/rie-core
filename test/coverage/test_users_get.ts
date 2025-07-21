@@ -34,7 +34,7 @@ describe('GET /users/:username', () => {
   it('should get user by username', async () => {
     const response = await request(server)
       .get(`/users/${testUsername}`)
-      .set('Cookie', [`auth_token=${users.user0.token}`])
+      .set('Cookie', [`access_token=${users.user0.token}`])
       .expect(200);
 
     expect(response.body).to.have.property('username', testUsername);
@@ -46,7 +46,7 @@ describe('GET /users/:username', () => {
 
     await request(server)
       .get(`/users/${nonExistentUsername}`)
-      .set('Cookie', [`auth_token=${users.user0.token}`])
+      .set('Cookie', [`access_token=${users.user0.token}`])
       .expect(404);
   });
 

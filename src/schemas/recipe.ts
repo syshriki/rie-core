@@ -1,12 +1,25 @@
 import * as z from 'zod/v4';
+import { BadRequestError } from '../httpErrors.ts';
 
-// Base recipe schema
-const recipeBaseSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(100, 'Title must not exceed 100 characters'),
-  description: z.string().max(500, 'Description must not exceed 500 characters').optional(),
-  ingredients: z.array(z.string()).min(1, 'At least one ingredient is required'),
-  instructions: z.array(z.string()).min(1, 'At least one instruction is required'),
-});
+export const recipeBaseSchema = z
+  .object({
+    title: z
+      .string()
+      .min(1)
+      .max(100)
+      .regex(/^[a-zA-Z0-9_\-\s\/,'&:.!()]+$/, {
+        error: () => {
+          throw new BadRequestError(
+            "title can only contain letters, numbers, spaces, and common punctuation (,&:.-_/'!())",
+            'SPECIAL_CHARS',
+          );
+        },
+      }),
+    description: z.string().max(500).optional(),
+    ingredients: z.string().optional(),
+    recipe: z.string(),
+  })
+  .strict();
 
 // Output schema for database recipe entity
 export const recipeEntitySchema = recipeBaseSchema.extend({
@@ -15,9 +28,6 @@ export const recipeEntitySchema = recipeBaseSchema.extend({
   createdAt: z.number().int(),
   updatedAt: z.number().int(),
 });
-
-// Input schema for recipe creation
-export const recipeCreateInputSchema = recipeBaseSchema;
 
 // Input schema for recipe update
 export const recipeUpdateInputSchema = recipeBaseSchema.partial();
@@ -47,8 +57,11 @@ export const recipeSearchQuerySchema = z.object({
 });
 
 export type RecipeEntity = z.infer<typeof recipeEntitySchema>;
-export type RecipeCreateInput = z.infer<typeof recipeCreateInputSchema>;
 export type RecipeUpdateInput = z.infer<typeof recipeUpdateInputSchema>;
+export type CreateRecipeInput = z.infer<typeof recipeBaseSchema> & {
+  authorId: number;
+  slug: string;
+};
 export type RecipeOutput = z.infer<typeof recipeOutputSchema>;
 export type RecipesOutput = z.infer<typeof recipesOutputSchema>;
 export type RecipeIdParam = z.infer<typeof recipeIdParamSchema>;
@@ -56,7 +69,6 @@ export type RecipeSearchQuery = z.infer<typeof recipeSearchQuerySchema>;
 
 export default {
   recipeEntitySchema,
-  recipeCreateInputSchema,
   recipeUpdateInputSchema,
   recipeOutputSchema,
   recipesOutputSchema,

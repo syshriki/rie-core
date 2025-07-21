@@ -13,17 +13,18 @@ CREATE TABLE users(
 );
 
 CREATE TABLE recipes(
-   id             BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-   name           VARCHAR(100)                NOT NULL,
-   slug           VARCHAR(30) UNIQUE          NOT NULL,
-   description    VARCHAR(500)                NOT NULL,
+   id             INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+   title           VARCHAR(100)                NOT NULL,
+   slug           VARCHAR(100) UNIQUE          NOT NULL,
+   description    VARCHAR(500)               ,
+   ingredients    VARCHAR(500)                ,
    recipe         VARCHAR(3000)               NOT NULL,
-   author         VARCHAR(20)                NOT NULL,
+   author_id        INTEGER                NOT NULL,
    created_at     TIMESTAMP    NOT NULL DEFAULT NOW(),
    deleted_at     TIMESTAMP    ,
    CONSTRAINT fk_recipes_author
-      FOREIGN KEY(author) 
-      REFERENCES users(username)
+      FOREIGN KEY(author_id) 
+      REFERENCES users(id)
 );
 
 CREATE TABLE recipe_favorites(

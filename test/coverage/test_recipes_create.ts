@@ -9,12 +9,11 @@ import users from '../helpers/users.json' with { type: 'json' };
 
 describe('POST /recipes', () => {
   let server: Server;
-  const testUsername = 'testuser';
   const testRecipe = {
     title: 'Test Recipe',
     description: 'A test recipe description',
-    ingredients: ['Ingredient 1', 'Ingredient 2'],
-    instructions: ['Step 1', 'Step 2'],
+    recipe: 'step1 step2',
+    ingredients: 'ingredient1, ingredient2',
   };
 
   before(async () => {
@@ -30,39 +29,131 @@ describe('POST /recipes', () => {
 
   beforeEach(async () => {
     await reinitializeDatabase();
-    await createUser(server, users.user0.token, { username: testUsername });
+    await createUser(server, users.user0.token, { id: 0 });
   });
 
-  it('should create a new recipe', async () => {
+  it('should 200 with all optional fields', async () => {
     const response = await request(server)
       .post('/recipes')
-      .set('Cookie', [`auth_token=${users.user0.token}`])
+      .set('Cookie', [`access_token=${users.user0.token}`])
       .send(testRecipe)
       .expect(201);
 
     expect(response.body).to.have.property('id').that.is.a('number');
     expect(response.body).to.have.property('title', testRecipe.title);
     expect(response.body).to.have.property('description', testRecipe.description);
+    expect(response.body).to.have.property('recipe').that.deep.equals(testRecipe.recipe);
+    expect(response.body).to.have.property('authorId', 0);
+    expect(response.body).to.have.property('createdAt').that.is.a('string');
+    expect(response.body).to.have.property('slug', 'test_recipe');
     expect(response.body).to.have.property('ingredients').that.deep.equals(testRecipe.ingredients);
-    expect(response.body)
-      .to.have.property('instructions')
-      .that.deep.equals(testRecipe.instructions);
-    expect(response.body).to.have.property('username', testUsername);
-    expect(response.body).to.have.property('createdAt').that.is.a('number');
   });
 
-  it('should require a valid username', async () => {
-    await request(server)
+  it('should 200 with only required fields', async () => {
+    const response = await request(server)
       .post('/recipes')
-      .send(testRecipe) // Missing username header
-      .expect(400); // Should fail with a 400 status
+      .set('Cookie', [`access_token=${users.user0.token}`])
+      .send({
+        title: testRecipe.title,
+        recipe: testRecipe.recipe,
+      })
+      .expect(201);
+
+    expect(response.body).to.have.property('id').that.is.a('number');
+    expect(response.body).to.have.property('title', testRecipe.title);
+    expect(response.body).to.have.property('recipe').that.deep.equals(testRecipe.recipe);
+    expect(response.body).to.have.property('authorId', 0);
+    expect(response.body).to.have.property('createdAt').that.is.a('string');
+    expect(response.body).to.have.property('slug', 'test_recipe');
   });
 
-  it('should require recipe data', async () => {
-    await request(server)
+  it('should 201 when title has minimum length (1 character)', async () => {
+    const minTitleRecipe = { ...testRecipe, title: 'A' };
+    const response = await request(server)
       .post('/recipes')
-      .set('X-Username', testUsername)
-      .send({}) // Empty recipe data
-      .expect(400); // Should fail with validation error
+      .set('Cookie', [`access_token=${users.user0.token}`])
+      .send(minTitleRecipe)
+      .expect(201);
+
+    expect(response.body).to.have.property('title', 'A');
+    expect(response.body).to.have.property('slug', 'a');
+  });
+
+  it('should 201 when title has maximum length (99 characters)', async () => {
+    const maxTitle = 'A'.repeat(99);
+    const maxTitleRecipe = { ...testRecipe, title: maxTitle };
+    const response = await request(server)
+      .post('/recipes')
+      .set('Cookie', [`access_token=${users.user0.token}`])
+      .send(maxTitleRecipe)
+      .expect(201);
+
+    expect(response.body).to.have.property('title', maxTitle);
+    expect(response.body).to.have.property('slug', 'a'.repeat(99));
+  });
+
+  it('should 201 when title contains special characters', async () => {
+    const specialTitleRecipe = { ...testRecipe, title: "Pasta & Meatballs: A Chef's Recipe!" };
+    const response = await request(server)
+      .post('/recipes')
+      .set('Cookie', [`access_token=${users.user0.token}`])
+      .send(specialTitleRecipe)
+      .expect(201);
+
+    expect(response.body).to.have.property('title', specialTitleRecipe.title);
+    expect(response.body).to.have.property('slug', 'pasta_meatballs_a_chefs_recipe');
+  });
+
+  it('should 201 when title has spaces and mixed capitalization', async () => {
+    const spacedTitleRecipe = { ...testRecipe, title: 'SPICY Chicken   Curry  With Rice' };
+    const response = await request(server)
+      .post('/recipes')
+      .set('Cookie', [`access_token=${users.user0.token}`])
+      .send(spacedTitleRecipe)
+      .expect(201);
+
+    expect(response.body).to.have.property('title', spacedTitleRecipe.title);
+    expect(response.body).to.have.property('slug', 'spicy_chicken_curry_with_rice');
+  });
+
+  it('should 400 when title exceeds maximum length', async () => {
+    const tooLongTitle = 'A'.repeat(101);
+    const invalidRecipe = { ...testRecipe, title: tooLongTitle };
+
+    const response = await request(server)
+      .post('/recipes')
+      .set('Cookie', [`access_token=${users.user0.token}`])
+      .send(invalidRecipe)
+      .expect(400);
+
+    expect(response.body).to.have.property('code', 'INPUT_TOO_BIG');
+  });
+
+  it('should 400 when title is empty', async () => {
+    const emptyTitleRecipe = { ...testRecipe, title: '' };
+
+    const response = await request(server)
+      .post('/recipes')
+      .set('Cookie', [`access_token=${users.user0.token}`])
+      .send(emptyTitleRecipe)
+      .expect(400);
+
+    expect(response.body).to.have.property('code', 'INPUT_TOO_SMALL');
+  });
+
+  it('should 400 when title contains forbidden special characters', async () => {
+    const forbiddenCharRecipe = { ...testRecipe, title: 'Recipe with \0 forbidden character' };
+
+    const response = await request(server)
+      .post('/recipes')
+      .set('Cookie', [`access_token=${users.user0.token}`])
+      .send(forbiddenCharRecipe)
+      .expect(400);
+
+    expect(response.body).to.have.property('code', 'SPECIAL_CHARS');
+  });
+
+  it('should 401 when missing access_token header', async () => {
+    await request(server).post('/recipes').send(testRecipe).expect(401);
   });
 });

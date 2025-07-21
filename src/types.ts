@@ -2,23 +2,22 @@ import type { Context } from 'koa';
 
 // State for Koa context
 export interface AppState {
-  user?: {
-    username: string;
-  };
   jwt: {
-    sub: string; // Subject (user ID)
-    iat: number; // Issued at
-    exp: number; // Expiration time
-    aud?: string; // Audience
+    sub: string;
+    iat: number;
+    exp: number;
+    aud?: string;
   };
-  validatedBody?: Record<string, unknown>;
-  validatedQuery?: Record<string, unknown>;
-  validatedParams?: Record<string, unknown>;
 }
 
 // Application context type (extends Koa.Context)
 export interface AppContext extends Context {
   state: AppState;
+  sanitizedRequest: {
+    params?: Record<string, unknown>;
+    query?: Record<string, unknown>;
+    body?: Record<string, unknown>;
+  };
 }
 
 // Base HTTP controller function type
