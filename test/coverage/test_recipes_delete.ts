@@ -6,29 +6,20 @@ import type { Server } from 'node:http';
 import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../src/app.ts';
+import type { RecipeEntity } from '../../src/schemas/recipe.ts';
+import { nockJwks } from '../helpers/auth.ts';
 import { reinitializeDatabase } from '../helpers/dbHelpers.ts';
+import { createFavorite, createRecipe } from '../helpers/recipeHelper.ts';
+import { createUser } from '../helpers/userHelper.ts';
+import users from '../helpers/users.json' with { type: 'json' };
 
-interface RecipeData {
-  title: string;
-  description?: string;
-  ingredients: string[];
-  instructions: string[];
-  [key: string]: unknown;
-}
-
-describe('DELETE /recipes/:id', () => {
+describe('DELETE /recipes/:slug', () => {
   let server: Server;
-  const testUsername = 'testuser';
-  const testRecipe: RecipeData = {
-    title: 'Test Recipe',
-    description: 'A test recipe description',
-    ingredients: ['Ingredient 1', 'Ingredient 2'],
-    instructions: ['Step 1', 'Step 2'],
-  };
-  let recipeId: number;
+  let recipe: RecipeEntity;
 
   before(async () => {
     server = await app();
+    nockJwks();
   });
 
   after(async () => {
@@ -39,59 +30,40 @@ describe('DELETE /recipes/:id', () => {
 
   beforeEach(async () => {
     await reinitializeDatabase();
-
-    // Create test user directly in the test
-    const userResponse = await request(server)
-      .post('/users')
-      .send({ username: testUsername })
-      .expect(201);
-
-    const recipeResponse = await request(server)
-      .post('/recipes')
-      .set('X-Username', testUsername)
-      .send(testRecipe)
-      .expect(201);
-
-    recipeId = recipeResponse.body.id as number;
+    await createUser(server, users.user0.token);
+    recipe = await createRecipe(server, users.user0.token);
   });
 
-  it('should delete a recipe', async () => {
-    // Delete the recipe
+  it('should 204 when recipe is deleted', async () => {
+    await createFavorite(server, users.user0.token, recipe.slug);
     await request(server)
-      .delete(`/recipes/${recipeId}`)
-      .set('X-Username', testUsername)
+      .delete(`/recipes/${recipe.slug}`)
+      .set('Cookie', [`access_token=${users.user0.token}`])
+      .expect(204);
+  });
+
+  it('should 400 if already deleted', async () => {
+    await request(server)
+      .delete(`/recipes/${recipe.slug}`)
+      .set('Cookie', [`access_token=${users.user0.token}`])
       .expect(204);
 
-    // Verify it's deleted by trying to fetch it
-    await request(server).get(`/recipes/${recipeId}`).set('X-Username', testUsername).expect(404);
+    const { body } = await request(server)
+      .delete(`/recipes/${recipe.slug}`)
+      .set('Cookie', [`access_token=${users.user0.token}`])
+      .expect(400);
+
+    expect(body).to.have.property('code', 'RECIPE_NOT_FOUND');
   });
 
-  it('should return 404 for non-existent recipe', async () => {
-    const nonExistentId = 9999;
+  it("should 403 when deleting another user's recipe", async () => {
+    await createUser(server, users.user1.token);
 
-    await request(server)
-      .delete(`/recipes/${nonExistentId}`)
-      .set('X-Username', testUsername)
-      .expect(404);
-  });
-
-  it('should not allow deleting recipes created by others', async () => {
-    // Create another user
-    const otherUsername = 'otheruser';
-    await request(server).post('/users').send({ username: otherUsername }).expect(201);
-
-    // Try to delete as different user
-    await request(server)
-      .delete(`/recipes/${recipeId}`)
-      .set('X-Username', otherUsername)
+    const { body } = await request(server)
+      .delete(`/recipes/${recipe.slug}`)
+      .set('Cookie', [`access_token=${users.user1.token}`])
       .expect(403);
 
-    // Verify recipe still exists
-    const response = await request(server)
-      .get(`/recipes/${recipeId}`)
-      .set('X-Username', testUsername)
-      .expect(200);
-
-    expect(response.body).to.have.property('id', recipeId);
+    expect(body).to.have.property('code', 'UNAUTHORIZED_DELETE');
   });
 });

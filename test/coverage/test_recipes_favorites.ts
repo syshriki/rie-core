@@ -13,7 +13,7 @@ import { createRecipe } from '../helpers/recipeHelper.ts';
 import { createUser } from '../helpers/userHelper.ts';
 import users from '../helpers/users.json' with { type: 'json' };
 
-describe('POST /recipes/:id/favorite', () => {
+describe('POST /recipes/:slug/favorite', () => {
   let server: Server;
   let recipe: RecipeEntity;
 

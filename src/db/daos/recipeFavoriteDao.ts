@@ -34,20 +34,14 @@ export const addFavorite = async (
   return favorite as unknown as RecipeFavoriteEntity;
 };
 
-/**
- * Remove a recipe from user's favorites
- * @param username - Username
- * @param recipeId - Recipe ID
- * @param sql - SQL client (optional)
- */
 export const removeFavorite = async (
-  username: string,
-  recipeId: number,
+  userId: number,
+  recipeSlug: string,
   sql: Sql = defaultSql,
 ): Promise<boolean> => {
   const result = await sql`
     DELETE FROM recipe_favorites
-    WHERE username = ${username} AND recipe_id = ${recipeId}
+    WHERE user_id = ${userId} AND recipe_slug = ${recipeSlug}
   `;
 
   return result.count > 0;
@@ -91,11 +85,6 @@ export const getFavorites = async (
   `;
 };
 
-/**
- * Get user ID by username
- * @param username - Username
- * @param sql - SQL client (optional)
- */
 export const getUserIdByUsername = async (
   username: string,
   sql: Sql = defaultSql,
@@ -112,18 +101,13 @@ export const getUserIdByUsername = async (
   return user.id as number;
 };
 
-/**
- * Delete favorites by recipe ID
- * @param recipeId - Recipe ID
- * @param sql - SQL client (optional)
- */
-export const deleteByRecipeId = async (
-  recipeId: number,
+export const deleteByRecipeSlug = async (
+  recipeSlug: string,
   sql: Sql = defaultSql,
 ): Promise<number> => {
   const result = await sql`
     DELETE FROM recipe_favorites
-    WHERE recipe_id = ${recipeId}
+    WHERE recipe_slug = ${recipeSlug}
   `;
 
   return result.count;

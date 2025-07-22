@@ -36,7 +36,7 @@ export const recipeBaseSchema = z.object({
 export const recipeEntitySchema = recipeBaseSchema.extend({
   id: z.number().int(),
   slug: recipeSlug,
-  username: z.string(),
+  authorId: z.number().int().positive(),
   createdAt: z.number().int(),
   updatedAt: z.number().int(),
 });

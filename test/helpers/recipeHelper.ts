@@ -18,3 +18,12 @@ export async function createRecipe(server: Server, token: string, recipe?: Creat
 
   return body;
 }
+
+export async function createFavorite(server: Server, token: string, recipeSlug: string) {
+  const { body } = await request(server)
+    .post(`/recipes/${recipeSlug}/favorite`)
+    .set('Cookie', [`access_token=${token}`])
+    .expect(200);
+
+  return body;
+}

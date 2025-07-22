@@ -8,7 +8,7 @@ export default async (ctx: AppContext): Promise<void> => {
 
   const { userId } = ctx.state;
 
-  const recipe = await recipeDao.findBySlug(slug);
+  const recipe = await recipeDao.findBySlug(slug, userId);
 
   if (!recipe) {
     throw new errors.BadRequestError(`recipe not found ${slug}`, 'RECIPE_NOT_FOUND');

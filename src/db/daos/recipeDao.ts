@@ -28,8 +28,11 @@ export const findById = async (
   sql: postgres.Sql = defaultSql,
 ): Promise<RecipeEntity | null> => {
   const [recipe] = await sql`
-    SELECT * FROM recipes INNER JOIN recipe_favorites ON recipes.slug = recipe_favorites.recipe_slug
-    WHERE recipes.id = ${id} AND recipe_favorites.user_id = ${userId} LIMIT 1
+    SELECT * FROM recipes 
+      LEFT JOIN recipe_favorites ON 
+        recipes.slug = recipe_favorites.recipe_slug AND 
+        recipe_favorites.user_id = ${userId}
+    WHERE recipes.id = ${id} AND deleted_at is NULL LIMIT 1
   `;
 
   return recipe as RecipeEntity;
@@ -44,7 +47,7 @@ export const findBySlug = async (
     SELECT r.*, CASE WHEN recipe_favorites.id IS NULL THEN FALSE ELSE TRUE END as is_favorite
     FROM recipes r
     LEFT JOIN recipe_favorites ON r.slug = recipe_favorites.recipe_slug AND recipe_favorites.user_id = ${userId}
-    WHERE r.slug = ${slug} LIMIT 1
+    WHERE r.slug = ${slug} AND deleted_at is NULL LIMIT 1
   `;
 
   return recipe as RecipeEntity;
@@ -91,12 +94,12 @@ export const update = async (
   return updatedRecipe as RecipeEntity;
 };
 
-export const deleteRecipe = async (
-  id: number,
+export const deleteByRecipeSlug = async (
+  slug: string,
   sql: postgres.Sql = defaultSql,
 ): Promise<boolean> => {
   const result = await sql`
-    DELETE FROM recipes WHERE id = ${id}
+    UPDATE recipes SET deleted_at = NOW() WHERE slug = ${slug} AND deleted_at IS NULL
   `;
   return result.count > 0;
 };

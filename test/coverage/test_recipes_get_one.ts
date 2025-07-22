@@ -14,7 +14,7 @@ import { createRecipe } from '../helpers/recipeHelper.ts';
 import { createUser } from '../helpers/userHelper.ts';
 import users from '../helpers/users.json' with { type: 'json' };
 
-describe('GET /recipes/:id', () => {
+describe('GET /recipes/:slug', () => {
   let server: Server;
   let recipe: RecipeEntity;
   let user: UserEntity;
