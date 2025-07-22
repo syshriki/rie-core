@@ -1,6 +1,7 @@
 import config from 'config';
 import * as jose from 'jose';
-import type { Context, Next } from 'koa';
+import type { Next } from 'koa';
+import type { AppContext } from '../types.ts';
 
 const JWKS = jose.createRemoteJWKSet(new URL(config.get<string>('auth.jwksUri')));
 
@@ -8,7 +9,7 @@ interface AuthOptions {
   useAuthorizationHeader?: boolean;
 }
 
-function getTokenFromHeader(ctx: Context): string | undefined {
+function getTokenFromHeader(ctx: AppContext): string | undefined {
   const authHeader = ctx.headers.authorization;
   if (authHeader?.startsWith('Bearer ')) {
     return authHeader.substring(7);
@@ -16,12 +17,12 @@ function getTokenFromHeader(ctx: Context): string | undefined {
   return undefined;
 }
 
-function getTokenFromCookie(ctx: Context): string | undefined {
+function getTokenFromCookie(ctx: AppContext): string | undefined {
   return ctx.cookies.get('access_token');
 }
 
 export function createAuthMiddleware(options: AuthOptions = {}) {
-  return async (ctx: Context, next: Next) => {
+  return async (ctx: AppContext, next: Next) => {
     try {
       const token = options.useAuthorizationHeader
         ? getTokenFromHeader(ctx)
@@ -40,7 +41,12 @@ export function createAuthMiddleware(options: AuthOptions = {}) {
         audience: config.get<string>('auth.audience'),
       });
 
-      ctx.state.jwt = payload;
+      if (!payload.sub) {
+        ctx.throw(400, 'invalid token payload');
+      }
+
+      ctx.state.userId = Number(payload.sub);
+
       await next();
     } catch (error) {
       if (error instanceof jose.errors.JWTExpired) {

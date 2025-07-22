@@ -14,17 +14,20 @@ import { sql as defaultSql } from '../connection.ts';
  * @param sql - SQL client (optional)
  */
 export const addFavorite = async (
-  username: string,
-  recipeId: number,
+  userId: number,
+  recipeSlug: string,
   sql: Sql = defaultSql,
 ): Promise<RecipeFavoriteEntity> => {
   const timestamp = Math.floor(Date.now() / 1000);
 
   // Try to insert, and if it fails due to conflict, fetch the existing record
   const [favorite] = await sql`
-    INSERT INTO recipe_favorites (username, recipe_id, created_at)
-    VALUES (${username}, ${recipeId}, ${timestamp})
-    ON CONFLICT (username, recipe_id) DO NOTHING
+    INSERT INTO recipe_favorites ${sql({
+      user_id: userId,
+      recipe_slug: recipeSlug,
+      created_at: timestamp,
+    })}
+    ON CONFLICT (user_id, recipe_slug) DO NOTHING
     RETURNING *
   `;
 
@@ -52,18 +55,18 @@ export const removeFavorite = async (
 
 /**
  * Check if a recipe is in user's favorites
- * @param username - Username
+ * @param userId - Number
  * @param recipeId - Recipe ID
  * @param sql - SQL client (optional)
  */
 export const isFavorite = async (
-  username: string,
+  userId: number,
   recipeId: number,
   sql: Sql = defaultSql,
 ): Promise<boolean> => {
   const [favorite] = await sql`
     SELECT 1 FROM recipe_favorites
-    WHERE username = ${username} AND recipe_id = ${recipeId}
+    WHERE user_id = ${userId} AND recipe_id = ${recipeId}
   `;
 
   return favorite !== undefined;

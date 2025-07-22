@@ -9,7 +9,7 @@ CREATE TABLE users(
    email          VARCHAR(100),
    username       VARCHAR(100) UNIQUE     NOT NULL,
    disabled       BOOLEAN DEFAULT FALSE,
-   created_at     TIMESTAMP    NOT NULL DEFAULT NOW()
+   created_at     TIMESTAMPTZ    NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE recipes(
@@ -20,8 +20,8 @@ CREATE TABLE recipes(
    ingredients    VARCHAR(500)                ,
    recipe         VARCHAR(3000)               NOT NULL,
    author_id        INTEGER                NOT NULL,
-   created_at     TIMESTAMP    NOT NULL DEFAULT NOW(),
-   deleted_at     TIMESTAMP    ,
+   created_at     TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+   deleted_at     TIMESTAMPTZ    ,
    CONSTRAINT fk_recipes_author
       FOREIGN KEY(author_id) 
       REFERENCES users(id)
@@ -30,14 +30,16 @@ CREATE TABLE recipes(
 CREATE TABLE recipe_favorites(
    id             BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
    recipe_slug    VARCHAR(30)     NOT NULL,
-   username       VARCHAR(20)     NOT NULL,
-   created_at     TIMESTAMP       NOT NULL DEFAULT NOW(),
-   CONSTRAINT fk_recipe_favorites_recipe_id
+   user_id         INTEGER     NOT NULL,
+   created_at     TIMESTAMPTZ       NOT NULL DEFAULT NOW(),
+   CONSTRAINT fk_recipe_favorites_recipe_slug
       FOREIGN KEY(recipe_slug) 
       REFERENCES recipes(slug),
-   CONSTRAINT fk_recipe_favorites_username
-      FOREIGN KEY(username) 
-      REFERENCES users(username)
+   CONSTRAINT fk_recipe_favorites_user_id
+      FOREIGN KEY(user_id) 
+      REFERENCES users(id),
+   CONSTRAINT unique_user_recipe_favorite
+      UNIQUE (user_id, recipe_slug)
 );
 
 CREATE TABLE news(
@@ -46,7 +48,7 @@ CREATE TABLE news(
    text           VARCHAR(500)                NOT NULL,
    title          VARCHAR(100)                NOT NULL,
    author         VARCHAR(20)                NOT NULL,
-   created_at     TIMESTAMP    NOT NULL DEFAULT NOW(),
+   created_at     TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
    recipe_slug    VARCHAR(30),
    CONSTRAINT fk_news_recipe_slug
       FOREIGN KEY(recipe_slug) 

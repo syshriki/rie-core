@@ -8,7 +8,6 @@ import request from 'supertest';
 import app from '../../src/app.ts';
 import { reinitializeDatabase } from '../helpers/dbHelpers.ts';
 
-// Define recipe data interface directly in test
 interface RecipeData {
   title: string;
   description?: string;
@@ -28,19 +27,16 @@ describe('DELETE /recipes/:id', () => {
   };
   let recipeId: number;
 
-  // Explicitly create server in the test file
   before(async () => {
     server = await app();
   });
 
-  // Explicitly close server in the test file
   after(async () => {
     await new Promise<void>((resolve) => {
       server.close(() => resolve());
     });
   });
 
-  // Clean up database and create test user and recipe before tests
   beforeEach(async () => {
     await reinitializeDatabase();
 
@@ -50,7 +46,6 @@ describe('DELETE /recipes/:id', () => {
       .send({ username: testUsername })
       .expect(201);
 
-    // Create a test recipe directly in the test
     const recipeResponse = await request(server)
       .post('/recipes')
       .set('X-Username', testUsername)

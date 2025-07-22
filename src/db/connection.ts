@@ -22,7 +22,7 @@ const createSqlClient = () => {
     connection: {
       application_name: 'rie-auth',
     },
-    //debug: console.log,
+    debug: console.log,
     transform: {
       ...postgres.toCamel,
       undefined: null,

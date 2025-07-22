@@ -21,6 +21,7 @@ const username = z
 // Output schema for database user entity
 export const userEntitySchema = z
   .object({
+    id: z.number().int(),
     username,
     createdAt: z.number().int(),
   })
@@ -34,20 +35,11 @@ export const userCreateInputSchema = z
   })
   .strict();
 
-// Output schema for user profile response
-export const userProfileOutputSchema = userEntitySchema
-  .extend({
-    isCurrentUser: z.boolean(),
-  })
-  .strict();
-
 // Infer TypeScript types from schemas
 export type UserEntity = z.infer<typeof userEntitySchema>;
 export type UserCreateInput = z.infer<typeof userCreateInputSchema>;
-export type UserProfileOutput = z.infer<typeof userProfileOutputSchema>;
 
 export default {
   userEntitySchema,
   userCreateInputSchema,
-  userProfileOutputSchema,
 };

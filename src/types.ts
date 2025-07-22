@@ -1,27 +1,19 @@
 import type { Context } from 'koa';
+import type Koa from 'koa';
 
-// State for Koa context
 export interface AppState {
-  jwt: {
-    sub: string;
-    iat: number;
-    exp: number;
-    aud?: string;
-  };
+  userId: number;
 }
 
-// Application context type (extends Koa.Context)
-export interface AppContext extends Context {
-  state: AppState;
+export interface ExtendedAppContext extends Context {
   sanitizedRequest: {
-    params?: Record<string, unknown>;
-    query?: Record<string, unknown>;
-    body?: Record<string, unknown>;
+    params?: object;
+    query?: object;
+    body?: object;
   };
 }
 
-// Base HTTP controller function type
-export type ControllerFunction = (ctx: AppContext, next?: () => Promise<void>) => Promise<void>;
+export type AppContext = Koa.ParameterizedContext<AppState, ExtendedAppContext>;
 
 // Database entity interfaces
 export interface User {

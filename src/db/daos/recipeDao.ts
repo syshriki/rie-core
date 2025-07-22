@@ -1,12 +1,13 @@
 import type postgres from 'postgres';
 
-import type { CreateRecipeInput, RecipeEntity } from '../../schemas/recipe.ts';
+import type { CreateRecipeInput, RecipeEntity, RecipeSearchEntity } from '../../schemas/recipe.ts';
 import { sql as defaultSql } from '../connection.ts';
 
 type RawRecipeEntity = CreateRecipeInput & {
   ingredients: string | unknown[];
   instructions: string | unknown[];
   isFavorite?: boolean;
+  createdAt: string;
 };
 
 export const create = async (
@@ -23,10 +24,27 @@ export const create = async (
 
 export const findById = async (
   id: number,
+  userId: number,
   sql: postgres.Sql = defaultSql,
 ): Promise<RecipeEntity | null> => {
   const [recipe] = await sql`
-    SELECT * FROM recipes WHERE id = ${id}
+    SELECT * FROM recipes INNER JOIN recipe_favorites ON recipes.slug = recipe_favorites.recipe_slug
+    WHERE recipes.id = ${id} AND recipe_favorites.user_id = ${userId} LIMIT 1
+  `;
+
+  return recipe as RecipeEntity;
+};
+
+export const findBySlug = async (
+  slug: string,
+  userId: number,
+  sql: postgres.Sql = defaultSql,
+): Promise<RecipeEntity | null> => {
+  const [recipe] = await sql`
+    SELECT r.*, CASE WHEN recipe_favorites.id IS NULL THEN FALSE ELSE TRUE END as is_favorite
+    FROM recipes r
+    LEFT JOIN recipe_favorites ON r.slug = recipe_favorites.recipe_slug AND recipe_favorites.user_id = ${userId}
+    WHERE r.slug = ${slug} LIMIT 1
   `;
 
   return recipe as RecipeEntity;
@@ -99,16 +117,18 @@ export const findByUsername = async (
 
 export const search = async (
   searchTerm: string,
-  cursor: number | null = null,
+  userId: number,
+  cursor: Date | null = null,
   limit = 10,
   sql: postgres.Sql = defaultSql,
-): Promise<RawRecipeEntity[]> => {
-  const searchPattern = `%${searchTerm}%`;
-  return sql<RawRecipeEntity[]>`
-    SELECT * FROM recipes 
-    WHERE title ILIKE ${searchPattern} OR description ILIKE ${searchPattern} 
-    ${cursor ? sql`AND created_at < ${cursor}` : sql``}
-    ORDER BY created_at DESC 
+): Promise<RecipeSearchEntity[]> => {
+  return sql<RecipeSearchEntity[]>`
+    SELECT r.*, CASE WHEN rf.id IS NULL THEN FALSE ELSE TRUE END as is_favorite 
+    FROM recipes r 
+    LEFT JOIN recipe_favorites rf ON r.slug = rf.recipe_slug AND rf.user_id = ${userId}
+    WHERE (title ILIKE ${`%${searchTerm}%`} OR r.description ILIKE ${`%${searchTerm}%`} )
+    ${cursor ? sql`AND r.created_at < ${cursor}` : sql``}
+    ORDER BY r.created_at DESC 
     LIMIT ${limit as number}
   `;
 };

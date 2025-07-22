@@ -8,7 +8,7 @@ import { generateUniqueUsername } from './userNameGenerator.ts';
 const maxTries = 5;
 
 export default async (ctx: AppContext): Promise<void> => {
-  const userId = Number(ctx.state.jwt.sub);
+  const { userId } = ctx.state;
 
   ctx.log.debug({ id: userId }, 'creating user');
 

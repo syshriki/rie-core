@@ -6,86 +6,75 @@ import type { Server } from 'node:http';
 import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../src/app.ts';
+import type { RecipeEntity } from '../../src/schemas/recipe.ts';
+import type { UserEntity } from '../../src/schemas/user.ts';
+import { nockJwks } from '../helpers/auth.ts';
 import { reinitializeDatabase } from '../helpers/dbHelpers.ts';
+import { createRecipe } from '../helpers/recipeHelper.ts';
+import { createUser } from '../helpers/userHelper.ts';
+import users from '../helpers/users.json' with { type: 'json' };
 
 describe('GET /recipes/:id', () => {
   let server: Server;
-  const testUsername = 'testuser';
-  const testRecipe = {
-    title: 'Test Recipe',
-    description: 'A test recipe description',
-    ingredients: ['Ingredient 1', 'Ingredient 2'],
-    instructions: ['Step 1', 'Step 2'],
-  };
-  let recipeId: number;
+  let recipe: RecipeEntity;
+  let user: UserEntity;
 
-  // Explicitly create server in the test file
   before(async () => {
     server = await app();
+    nockJwks();
   });
 
-  // Explicitly close server in the test file
   after(async () => {
     await new Promise<void>((resolve) => {
       server.close(() => resolve());
     });
   });
 
-  // Clean up database and create test user and recipe before tests
   beforeEach(async () => {
     await reinitializeDatabase();
 
-    // Create test user directly in the test
-    await request(server).post('/users').send({ username: testUsername }).expect(201);
-
-    // Create a test recipe
-    const response = await request(server)
-      .post('/recipes')
-      .set('X-Username', testUsername)
-      .send(testRecipe)
-      .expect(201);
-
-    recipeId = response.body.id;
+    user = await createUser(server, users.user0.token);
+    recipe = await createRecipe(server, users.user0.token);
   });
 
   it('should get a specific recipe by ID', async () => {
     const response = await request(server)
-      .get(`/recipes/${recipeId}`)
-      .set('X-Username', testUsername)
+      .get(`/recipes/${recipe.slug}`)
+      .set('Cookie', [`access_token=${users.user0.token}`])
       .expect(200);
 
-    expect(response.body).to.have.property('id', recipeId);
-    expect(response.body).to.have.property('title', testRecipe.title);
-    expect(response.body).to.have.property('description', testRecipe.description);
-    expect(response.body).to.have.property('ingredients').that.deep.equals(testRecipe.ingredients);
-    expect(response.body)
-      .to.have.property('instructions')
-      .that.deep.equals(testRecipe.instructions);
-    expect(response.body).to.have.property('username', testUsername);
+    expect(response.body).to.have.property('id', recipe.id);
+    expect(response.body).to.have.property('title', recipe.title);
+    expect(response.body).to.have.property('description', recipe.description);
+    expect(response.body).to.have.property('ingredients').that.deep.equals(recipe.ingredients);
+    expect(response.body).to.have.property('recipe').that.deep.equals(recipe.recipe);
+    expect(response.body).to.have.property('authorId', user.id);
   });
 
-  it('should return 404 for non-existent recipe', async () => {
+  it('should 400 for non-existent recipe', async () => {
     const nonExistentId = 9999;
 
-    await request(server)
+    const { body } = await request(server)
       .get(`/recipes/${nonExistentId}`)
-      .set('X-Username', testUsername)
-      .expect(404);
+      .set('Cookie', [`access_token=${users.user0.token}`])
+      .expect(400);
+
+    expect(body.code).to.equal('RECIPE_NOT_FOUND');
   });
 
   it('should include favorite status for the authenticated user', async () => {
     // First add recipe to favorites
     await request(server)
-      .post(`/recipes/${recipeId}/favorite`)
-      .set('X-Username', testUsername)
-      .expect(201);
+      .post(`/recipes/${recipe.slug}/favorite`)
+      .set('Cookie', [`access_token=${users.user0.token}`])
+      .expect(200);
 
     // Then check that the recipe includes favorite status
     const response = await request(server)
-      .get(`/recipes/${recipeId}`)
-      .set('X-Username', testUsername)
+      .get(`/recipes/${recipe.slug}`)
+      .set('Cookie', [`access_token=${users.user0.token}`])
       .expect(200);
 
-    expect(response.body).to.have.property('favorited', true);
+    expect(response.body).to.have.property('isFavorite', true);
   });
 });

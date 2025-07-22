@@ -1,10 +1,6 @@
-/**
- * Create a new recipe
- */
-
 import _ from 'lodash';
 import * as recipeDao from '../../../db/daos/recipeDao.ts';
-import type { AppContext } from '../../../types.ts';
+import type { AppContext, ExtendedAppContext } from '../../../types.ts';
 import type { CreateRecipeBody } from './schema.ts';
 /**
  * Converts a title string to a URL-friendly slug
@@ -26,7 +22,7 @@ export default async (ctx: AppContext): Promise<void> => {
   const slug = titleToSlug(recipeData.title);
 
   const required = {
-    authorId: Number(ctx.state.jwt.sub),
+    authorId: ctx.state.userId,
     title: recipeData.title,
     recipe: recipeData.recipe,
     slug,

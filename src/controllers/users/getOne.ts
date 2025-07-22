@@ -28,7 +28,7 @@ async function getUserProfile(
 export default async (ctx: AppContext): Promise<void> => {
   const { username } = ctx.params;
 
-  const currentUsername = ctx.state.jwt.sub;
+  const { userId } = ctx.state;
 
   // Get user profile with isCurrentUser flag
   const userProfile = await getUserProfile(username, currentUsername);

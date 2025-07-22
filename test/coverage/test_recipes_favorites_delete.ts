@@ -1,9 +1,4 @@
-/**
- * Tests for recipe favorites endpoints - Direct Import Pattern
- */
-
 import type { Server } from 'node:http';
-import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../src/app.ts';
 import type { RecipeEntity } from '../../src/schemas/recipe.ts';
@@ -13,7 +8,7 @@ import { createRecipe } from '../helpers/recipeHelper.ts';
 import { createUser } from '../helpers/userHelper.ts';
 import users from '../helpers/users.json' with { type: 'json' };
 
-describe('POST /recipes/:id/favorite', () => {
+describe('DELETE /recipes/:id/favorite', () => {
   let server: Server;
   let recipe: RecipeEntity;
 
@@ -35,29 +30,30 @@ describe('POST /recipes/:id/favorite', () => {
     recipe = await createRecipe(server, users.user0.token);
   });
 
-  it('should add a recipe to favorites', async () => {
-    const response = await request(server)
-      .post(`/recipes/${recipe.slug}/favorite`)
-      .set('Cookie', [`access_token=${users.user0.token}`])
-      .expect(200);
-
-    expect(response.body).to.have.property('recipeSlug', recipe.slug);
-    expect(response.body).to.have.property('userId', 0);
-  });
-
-  it('should require authentication', async () => {
-    await request(server).post(`/recipes/${recipe.slug}/favorite`).expect(401);
-  });
-
-  it('should 200 if already favorited', async () => {
+  it('should remove a recipe from favorites', async () => {
+    // First add to favorites
     await request(server)
       .post(`/recipes/${recipe.slug}/favorite`)
       .set('Cookie', [`access_token=${users.user0.token}`])
-      .expect(200);
+      .expect(201);
 
+    // Then remove from favorites
     await request(server)
-      .post(`/recipes/${recipe.slug}/favorite`)
+      .delete(`/recipes/${recipe.slug}/favorite`)
       .set('Cookie', [`access_token=${users.user0.token}`])
       .expect(204);
+
+    // Verify it's removed by trying to add it again
+    await request(server)
+      .post(`/recipes/${recipe.slug}/favorite`)
+      .set('Cookie', [`access_token=${users.user0.token}`])
+      .expect(201);
+  });
+
+  it('should return 404 if recipe was not favorited', async () => {
+    await request(server)
+      .delete(`/recipes/${recipe.slug}/favorite`)
+      .set('Cookie', [`access_token=${users.user0.token}`])
+      .expect(404);
   });
 });

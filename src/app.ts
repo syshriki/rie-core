@@ -8,6 +8,7 @@ import { pino } from 'pino';
 import { createSqlClient } from './db/connection.ts';
 import errorHandler from './middleware/errorHandler.ts';
 import router from './routes.ts';
+import type { AppState, ExtendedAppContext } from './types.ts';
 import initializeErrorHandler from './zodConfig.ts';
 
 const logger = pino();
@@ -15,7 +16,7 @@ const logger = pino();
 initializeErrorHandler();
 
 const createApp = async (): Promise<http.Server> => {
-  const app = new Koa({ proxy: true });
+  const app = new Koa<AppState, ExtendedAppContext>({ proxy: true });
   const sqlClient = await createSqlClient();
 
   app.use(

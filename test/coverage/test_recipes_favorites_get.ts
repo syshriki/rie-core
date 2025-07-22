@@ -1,7 +1,3 @@
-/**
- * Tests for recipe favorites endpoints - Direct Import Pattern
- */
-
 import type { Server } from 'node:http';
 import { expect } from 'chai';
 import request from 'supertest';
@@ -13,8 +9,9 @@ import { createRecipe } from '../helpers/recipeHelper.ts';
 import { createUser } from '../helpers/userHelper.ts';
 import users from '../helpers/users.json' with { type: 'json' };
 
-describe('POST /recipes/:id/favorite', () => {
+describe('GET /users/:username/favorites', () => {
   let server: Server;
+  const testUsername = 'testuser';
   let recipe: RecipeEntity;
 
   before(async () => {
@@ -35,29 +32,20 @@ describe('POST /recipes/:id/favorite', () => {
     recipe = await createRecipe(server, users.user0.token);
   });
 
-  it('should add a recipe to favorites', async () => {
+  it('should return user favorites', async () => {
+    await request(server)
+      .post(`/recipes/${recipe.slug}/favorite`)
+      .set('Cookie', [`access_token=${users.user0.token}`])
+      .expect(201);
+
+    // Get favorites
     const response = await request(server)
-      .post(`/recipes/${recipe.slug}/favorite`)
+      .get(`/users/${testUsername}/favorites`)
       .set('Cookie', [`access_token=${users.user0.token}`])
       .expect(200);
 
-    expect(response.body).to.have.property('recipeSlug', recipe.slug);
-    expect(response.body).to.have.property('userId', 0);
-  });
-
-  it('should require authentication', async () => {
-    await request(server).post(`/recipes/${recipe.slug}/favorite`).expect(401);
-  });
-
-  it('should 200 if already favorited', async () => {
-    await request(server)
-      .post(`/recipes/${recipe.slug}/favorite`)
-      .set('Cookie', [`access_token=${users.user0.token}`])
-      .expect(200);
-
-    await request(server)
-      .post(`/recipes/${recipe.slug}/favorite`)
-      .set('Cookie', [`access_token=${users.user0.token}`])
-      .expect(204);
+    expect(response.body).to.have.property('recipes');
+    expect(response.body.recipes).to.be.an('array').with.lengthOf(1);
+    expect(response.body.recipes[0]).to.have.property('id', recipe.id);
   });
 });

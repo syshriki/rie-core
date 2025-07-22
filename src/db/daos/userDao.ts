@@ -10,13 +10,10 @@ export const create = async (user: UserCreateInput, sql: Sql = defaultSql): Prom
   return createdUser as UserEntity;
 };
 
-export const findByUsername = async (
-  username: string,
-  sql: Sql = defaultSql,
-): Promise<UserEntity | null> => {
+export const findById = async (id: number, sql: Sql = defaultSql): Promise<UserEntity | null> => {
   const [user] = await sql`
     SELECT * FROM users 
-    WHERE username = ${username} 
+    WHERE id = ${id} 
     LIMIT 1
   `;
 
