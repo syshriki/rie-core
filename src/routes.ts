@@ -1,8 +1,4 @@
 import Router from 'koa-router';
-import { paginationSchema } from './schemas/index.ts';
-
-import userCreateController from './controllers/users/create/index.ts';
-import userGetOneController from './controllers/users/getOne/index.ts';
 
 import recipeAddFavoriteController from './controllers/recipes/addFavorite/index.ts';
 import recipeCreateController from './controllers/recipes/create/index.ts';
@@ -11,7 +7,10 @@ import recipeRemoveFavoriteController from './controllers/recipes/deleteFavorite
 import recipeGetAllController from './controllers/recipes/getAll/index.ts';
 import recipeGetOneController from './controllers/recipes/getOne/index.ts';
 import recipeFavoritesController from './controllers/recipes/getUserFavorites.ts';
-import recipeUpdateController from './controllers/recipes/update.ts';
+import recipeUpdateController from './controllers/recipes/update/index.ts';
+import userCreateController from './controllers/users/create/index.ts';
+import userGetOneController from './controllers/users/getOne/index.ts';
+import { paginationSchema } from './schemas/pagination.ts';
 
 import newsGetAllController from './controllers/news/getAll.ts';
 import newsGetByRecipeController from './controllers/news/getByRecipe.ts';
@@ -23,9 +22,13 @@ import { deleteRecipeParam } from './controllers/recipes/delete/schema.ts';
 import { deleteFavoriteParam } from './controllers/recipes/deleteFavorite/schema.ts';
 import { recipeSchemaQuery } from './controllers/recipes/getAll/schema.ts';
 import { getOneRecipeParamSchema } from './controllers/recipes/getOne/schema.ts';
+import {
+  updateRecipeBodySchema,
+  updateRecipeParamSchema,
+} from './controllers/recipes/update/schema.ts';
 import { getOneUserParam } from './controllers/users/getOne/schema.ts';
 import { createAuthMiddleware } from './middleware/auth.ts';
-import { recipeIdParamSchema, recipeUpdateInputSchema } from './schemas/recipe.ts';
+import { recipeIdParamSchema } from './schemas/recipe.ts';
 import type { AppState, ExtendedAppContext } from './types.ts';
 
 const router = new Router<AppState, ExtendedAppContext>({});
@@ -61,9 +64,12 @@ router.get(
   recipeGetOneController,
 );
 router.put(
-  '/recipes/:id',
+  '/recipes/:slug',
   withCookieAuth,
-  validateRequest({ params: recipeIdParamSchema, body: recipeUpdateInputSchema }),
+  validateRequest({
+    params: updateRecipeParamSchema,
+    body: updateRecipeBodySchema,
+  }),
   recipeUpdateController,
 );
 router.delete(

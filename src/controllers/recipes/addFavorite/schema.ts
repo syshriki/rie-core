@@ -1,9 +1,8 @@
 import * as z from 'zod/v4';
-import { recipeSlug } from '../../../schemas/index.ts';
 
 export const createFavoriteParam = z
   .object({
-    slug: recipeSlug,
+    slug: z.string().min(2).max(100),
   })
   .strict();
 

@@ -53,53 +53,12 @@ export const findBySlug = async (
   return recipe as RecipeEntity;
 };
 
-export const update = async (
-  id: number,
-  recipe: Partial<Omit<RecipeEntity, 'id' | 'username' | 'createdAt'>>,
-  sql: postgres.Sql = defaultSql,
-): Promise<RecipeEntity | null> => {
-  const updateData: Record<string, string | number | null> = {};
-
-  if (recipe.title !== undefined) updateData.title = recipe.title;
-  if (recipe.description !== undefined) updateData.description = recipe.description;
-
-  if (recipe.ingredients !== undefined) {
-    updateData.ingredients = JSON.stringify(recipe.ingredients);
-  }
-
-  if (recipe.instructions !== undefined) {
-    updateData.instructions = JSON.stringify(recipe.instructions);
-  }
-
-  updateData.updated_at = Math.floor(Date.now() / 1000);
-
-  // Only proceed if we have something to update
-  if (Object.keys(updateData).length === 0) {
-    return await findById(id, sql);
-  }
-
-  const columns = Object.keys(updateData).map((key) =>
-    sql.unsafe(`${key.replace(/([A-Z])/g, '_$1').toLowerCase()} = ?`, [
-      updateData[key] as string | number | null,
-    ]),
-  );
-
-  const [updatedRecipe] = await sql`
-    UPDATE recipes 
-    SET ${sql.unsafe(columns.join(', '))}
-    WHERE id = ${id}
-    RETURNING *
-  `;
-
-  return updatedRecipe as RecipeEntity;
-};
-
 export const deleteByRecipeSlug = async (
   slug: string,
   sql: postgres.Sql = defaultSql,
 ): Promise<boolean> => {
   const result = await sql`
-    UPDATE recipes SET deleted_at = NOW() WHERE slug = ${slug} AND deleted_at IS NULL
+    UPDATE recipes SET deleted_at = NOW(), deleted = TRUE WHERE slug = ${slug} AND deleted_at IS NULL
   `;
   return result.count > 0;
 };

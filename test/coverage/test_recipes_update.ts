@@ -6,25 +6,24 @@ import type { Server } from 'node:http';
 import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../src/app.ts';
+import type { RecipeEntity } from '../../src/schemas/recipe.ts';
+import type { UserEntity } from '../../src/schemas/user.ts';
+import { nockJwks } from '../helpers/auth.ts';
 import { reinitializeDatabase } from '../helpers/dbHelpers.ts';
+import { createFavorite, createRecipe } from '../helpers/recipeHelper.ts';
+import { createUser } from '../helpers/userHelper.ts';
+import users from '../helpers/users.json' with { type: 'json' };
 
-describe('PUT /recipes/:id', () => {
+describe('PUT /recipes/:slug', () => {
   let server: Server;
-  const testUsername = 'testuser';
-  const testRecipe = {
-    title: 'Test Recipe',
-    description: 'A test recipe description',
-    ingredients: ['Ingredient 1', 'Ingredient 2'],
-    instructions: ['Step 1', 'Step 2'],
-  };
-  let recipeId: number;
+  let recipe: RecipeEntity;
+  let user: UserEntity;
 
-  // Explicitly create server in the test file
   before(async () => {
     server = await app();
+    nockJwks();
   });
 
-  // Explicitly close server in the test file
   after(async () => {
     await new Promise<void>((resolve) => {
       server.close(() => resolve());
@@ -34,94 +33,78 @@ describe('PUT /recipes/:id', () => {
   // Clean up database and create test user and recipe before tests
   beforeEach(async () => {
     await reinitializeDatabase();
-
-    // Create test user directly in the test
-    await request(server).post('/users').send({ username: testUsername }).expect(201);
-
-    // Create a test recipe
-    const response = await request(server)
-      .post('/recipes')
-      .set('X-Username', testUsername)
-      .send(testRecipe)
-      .expect(201);
-
-    recipeId = response.body.id;
+    user = await createUser(server, users.user0.token);
+    recipe = await createRecipe(server, users.user0.token);
+    await createFavorite(server, users.user0.token, recipe.slug);
   });
 
-  it('should update a recipe', async () => {
+  it('should 200 when recipe successfully updated', async () => {
     const updatedRecipe = {
       title: 'Updated Recipe Title',
       description: 'Updated description',
-      ingredients: ['Updated Ingredient 1', 'Updated Ingredient 2', 'New Ingredient'],
-      instructions: ['Updated Step 1', 'Updated Step 2', 'New Step'],
+      ingredients: `'Updated Ingredient 1', 'Updated Ingredient 2', 'New Ingredient'`,
+      recipe: `'Updated Step 1', 'Updated Step 2', 'New Step'`,
     };
 
     const response = await request(server)
-      .put(`/recipes/${recipeId}`)
-      .set('X-Username', testUsername)
+      .put(`/recipes/${recipe.slug}`)
+      .set('Cookie', [`access_token=${users.user0.token}`])
       .send(updatedRecipe)
       .expect(200);
 
-    expect(response.body).to.have.property('id', recipeId);
+    expect(response.body).to.have.property('id', recipe.id + 1);
     expect(response.body).to.have.property('title', updatedRecipe.title);
     expect(response.body).to.have.property('description', updatedRecipe.description);
+    expect(response.body).to.have.property('slug', recipe.slug);
     expect(response.body)
       .to.have.property('ingredients')
       .that.deep.equals(updatedRecipe.ingredients);
-    expect(response.body)
-      .to.have.property('instructions')
-      .that.deep.equals(updatedRecipe.instructions);
-    expect(response.body).to.have.property('username', testUsername);
+    expect(response.body).to.have.property('recipe').that.deep.equals(updatedRecipe.recipe);
+    expect(response.body).to.have.property('authorId', user.id);
   });
 
-  it('should return 404 for non-existent recipe', async () => {
+  it('should 400 for non-existent recipe', async () => {
     const nonExistentId = 9999;
 
-    await request(server)
+    const { body } = await request(server)
       .put(`/recipes/${nonExistentId}`)
-      .set('X-Username', testUsername)
+      .set('Cookie', [`access_token=${users.user0.token}`])
       .send({
         title: 'Updated Recipe',
-        ingredients: ['Ingredient'],
-        instructions: ['Instruction'],
-      })
-      .expect(404);
-  });
-
-  it('should require all mandatory fields', async () => {
-    // Missing instructions field
-    await request(server)
-      .put(`/recipes/${recipeId}`)
-      .set('X-Username', testUsername)
-      .send({
-        title: 'Updated Recipe',
-        ingredients: ['Ingredient'],
+        ingredients: 'Ingredient',
+        recipe: 'Instruction',
       })
       .expect(400);
+
+    expect(body).to.have.property('code', 'RECIPE_NOT_FOUND');
   });
 
-  it('should not allow updating recipes created by others', async () => {
-    // Create another user
-    const otherUsername = 'otheruser';
-    await request(server).post('/users').send({ username: otherUsername }).expect(201);
+  it('should 400 on missing required field', async () => {
+    const { body } = await request(server)
+      .put(`/recipes/${recipe.slug}`)
+      .set('Cookie', [`access_token=${users.user0.token}`])
+      .send({
+        title: 'Updated Recipe',
+        ingredients: 'Ingredient',
+      })
+      .expect(400);
 
-    // Try to update as different user
-    await request(server)
-      .put(`/recipes/${recipeId}`)
-      .set('X-Username', otherUsername)
+    expect(body).to.have.property('code', 'MISSING_KEY');
+  });
+
+  it('should 403 when updating recipes created by others', async () => {
+    await createUser(server, users.user1.token);
+
+    const { body } = await request(server)
+      .put(`/recipes/${recipe.slug}`)
+      .set('Cookie', [`access_token=${users.user1.token}`])
       .send({
         title: 'Hijacked Recipe',
-        ingredients: ['Bad Ingredient'],
-        instructions: ['Bad Instruction'],
+        ingredients: 'Bad Ingredient',
+        recipe: 'Bad Instruction',
       })
       .expect(403);
 
-    // Verify original recipe unchanged
-    const response = await request(server)
-      .get(`/recipes/${recipeId}`)
-      .set('X-Username', testUsername)
-      .expect(200);
-
-    expect(response.body).to.have.property('title', testRecipe.title);
+    expect(body).to.have.property('code', 'UNAUTHORIZED_UPDATE');
   });
 });

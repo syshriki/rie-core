@@ -41,9 +41,6 @@ export const recipeEntitySchema = recipeBaseSchema.extend({
   updatedAt: z.number().int(),
 });
 
-// Input schema for recipe update
-export const recipeUpdateInputSchema = recipeBaseSchema.partial();
-
 // Output schema for single recipe response
 export const recipeOutputSchema = recipeEntitySchema.extend({
   isFavorite: z.boolean(),
@@ -62,7 +59,6 @@ export const recipeIdParamSchema = z.object({
 });
 
 export type RecipeEntity = z.infer<typeof recipeEntitySchema>;
-export type RecipeUpdateInput = z.infer<typeof recipeUpdateInputSchema>;
 export type CreateRecipeInput = z.infer<typeof recipeBaseSchema> & {
   authorId: number;
   slug: string;
@@ -75,7 +71,6 @@ export type RecipeIdParam = z.infer<typeof recipeIdParamSchema>;
 
 export default {
   recipeEntitySchema,
-  recipeUpdateInputSchema,
   recipeOutputSchema,
   recipesOutputSchema,
   recipeIdParamSchema,

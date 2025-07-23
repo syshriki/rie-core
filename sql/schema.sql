@@ -1,4 +1,3 @@
--- Schema for RIE Server database
 
 DROP SCHEMA IF EXISTS public CASCADE;
 
@@ -12,29 +11,41 @@ CREATE TABLE users(
    created_at     TIMESTAMPTZ    NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE slugs(
+   slug           VARCHAR(100) PRIMARY KEY,
+   created_at     TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+   deleted_at     TIMESTAMPTZ    ,
+   deleted        BOOLEAN NOT NULL DEFAULT FALSE
+);
+
 CREATE TABLE recipes(
    id             INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
    title           VARCHAR(100)                NOT NULL,
-   slug           VARCHAR(100) UNIQUE          NOT NULL,
+   slug           VARCHAR(100)          NOT NULL,
    description    VARCHAR(500)               ,
    ingredients    VARCHAR(500)                ,
    recipe         VARCHAR(3000)               NOT NULL,
    author_id        INTEGER                NOT NULL,
    created_at     TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
    deleted_at     TIMESTAMPTZ    ,
+   deleted        BOOLEAN NOT NULL DEFAULT FALSE, 
    CONSTRAINT fk_recipes_author
       FOREIGN KEY(author_id) 
-      REFERENCES users(id)
+      REFERENCES users(id),
+   CONSTRAINT fk_recipes_slug
+      FOREIGN KEY(slug) 
+      REFERENCES slugs(slug),
+   UNIQUE (slug,deleted)
 );
 
 CREATE TABLE recipe_favorites(
    id             BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-   recipe_slug    VARCHAR(30)     NOT NULL,
+   recipe_slug    VARCHAR(100)     NOT NULL,
    user_id         INTEGER     NOT NULL,
    created_at     TIMESTAMPTZ       NOT NULL DEFAULT NOW(),
    CONSTRAINT fk_recipe_favorites_recipe_slug
       FOREIGN KEY(recipe_slug) 
-      REFERENCES recipes(slug),
+      REFERENCES slugs(slug),
    CONSTRAINT fk_recipe_favorites_user_id
       FOREIGN KEY(user_id) 
       REFERENCES users(id),
@@ -49,10 +60,10 @@ CREATE TABLE news(
    title          VARCHAR(100)                NOT NULL,
    author         VARCHAR(20)                NOT NULL,
    created_at     TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
-   recipe_slug    VARCHAR(30),
+   recipe_slug    VARCHAR(100),
    CONSTRAINT fk_news_recipe_slug
       FOREIGN KEY(recipe_slug) 
-      REFERENCES recipes(slug),
+      REFERENCES slugs(slug),
    CONSTRAINT fk_news_author
       FOREIGN KEY(author) 
       REFERENCES users(username)
