@@ -6,16 +6,18 @@ import recipeDeleteController from './controllers/recipes/delete/index.ts';
 import recipeRemoveFavoriteController from './controllers/recipes/deleteFavorite/index.ts';
 import recipeGetAllController from './controllers/recipes/getAll/index.ts';
 import recipeGetOneController from './controllers/recipes/getOne/index.ts';
-import recipeFavoritesController from './controllers/recipes/getUserFavorites.ts';
 import recipeUpdateController from './controllers/recipes/update/index.ts';
 import userCreateController from './controllers/users/create/index.ts';
+import getUserFavoritesController from './controllers/users/getFavorites/index.ts';
 import userGetOneController from './controllers/users/getOne/index.ts';
+import userGetRecipesController from './controllers/users/getRecipes/index.ts';
 import { paginationSchema } from './schemas/pagination.ts';
 
-import newsGetAllController from './controllers/news/getAll.ts';
-import newsGetByRecipeController from './controllers/news/getByRecipe.ts';
+import newsGetAllController from './controllers/news/getAll/index.ts';
 import validateRequest from './middleware/validateRequest.ts';
 
+import newsCreateController from './controllers/news/create/index.ts';
+import { createNewsSchema } from './controllers/news/create/schema.ts';
 import { createFavoriteParam } from './controllers/recipes/addFavorite/schema.ts';
 import { createRecipeBody } from './controllers/recipes/create/schema.ts';
 import { deleteRecipeParam } from './controllers/recipes/delete/schema.ts';
@@ -26,9 +28,16 @@ import {
   updateRecipeBodySchema,
   updateRecipeParamSchema,
 } from './controllers/recipes/update/schema.ts';
+import {
+  getUserFavoritesParam,
+  getUserFavoritesQuery,
+} from './controllers/users/getFavorites/schema.ts';
 import { getOneUserParam } from './controllers/users/getOne/schema.ts';
+import {
+  getUserRecipesParamSchema,
+  getUserRecipesQuerySchema,
+} from './controllers/users/getRecipes/schema.ts';
 import { createAuthMiddleware } from './middleware/auth.ts';
-import { recipeIdParamSchema } from './schemas/recipe.ts';
 import type { AppState, ExtendedAppContext } from './types.ts';
 
 const router = new Router<AppState, ExtendedAppContext>({});
@@ -37,11 +46,22 @@ const withCookieAuth = createAuthMiddleware({});
 const withBearerAuth = createAuthMiddleware({ useAuthorizationHeader: true });
 
 router.post('/users', withBearerAuth, userCreateController);
+
 router.get(
   '/users/:id',
   withCookieAuth,
   validateRequest({ params: getOneUserParam }),
   userGetOneController,
+);
+
+router.get(
+  '/users/:id/recipes',
+  withCookieAuth,
+  validateRequest({
+    params: getUserRecipesParamSchema,
+    query: getUserRecipesQuerySchema,
+  }),
+  userGetRecipesController,
 );
 
 router.post(
@@ -92,17 +112,23 @@ router.delete(
   recipeRemoveFavoriteController,
 );
 router.get(
-  '/recipes/favorites',
+  '/users/:id/favorites',
+  withCookieAuth,
+  validateRequest({ query: getUserFavoritesQuery, params: getUserFavoritesParam }),
+  getUserFavoritesController,
+);
+router.get(
+  '/news',
   withCookieAuth,
   validateRequest({ query: paginationSchema }),
-  recipeFavoritesController,
+  newsGetAllController,
 );
-router.get('/news', validateRequest({ query: paginationSchema }), newsGetAllController);
-router.get(
-  '/recipes/:id/news',
+
+router.post(
+  '/news',
   withCookieAuth,
-  validateRequest({ params: recipeIdParamSchema, query: paginationSchema }),
-  newsGetByRecipeController,
+  validateRequest({ body: createNewsSchema }),
+  newsCreateController,
 );
 
 export default router;

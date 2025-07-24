@@ -11,7 +11,7 @@ interface SlugEntity {
 
 export const createRecipeSlug = async (sql: postgres.Sql = defaultSql): Promise<SlugEntity> => {
   const [{ v }] = await sql<[{ v: number }]>`
-            SELECT last_value + 1 as v FROM recipes_id_seq
+            SELECT nextval('recipe_slug') as v;
         `;
   const payload = { slug: `r${v}` };
   const [createdSlug] = await sql<SlugEntity[]>`

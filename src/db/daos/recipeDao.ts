@@ -63,20 +63,6 @@ export const deleteByRecipeSlug = async (
   return result.count > 0;
 };
 
-export const findByUsername = async (
-  username: string,
-  cursor: number | null = null,
-  limit = 10,
-  sql: postgres.Sql = defaultSql,
-): Promise<RawRecipeEntity[]> => {
-  return sql<RawRecipeEntity[]>`
-    SELECT * FROM recipes ${cursor ? sql`WHERE created_at < ${cursor}` : sql``}
-    AND username = ${username} 
-    ORDER BY created_at DESC 
-    LIMIT ${limit as number}
-  `;
-};
-
 export const search = async (
   searchTerm: string,
   userId: number,
@@ -112,18 +98,21 @@ export const findWithFavoriteStatus = async (
   `;
 };
 
-export const findFavorites = async (
+export const findByAuthorId = async (
+  authorId: number,
   userId: number,
-  cursor: number | null = null,
+  cursor: Date | null = null,
   limit = 10,
   sql: postgres.Sql = defaultSql,
-): Promise<Array<RecipeEntity>> => {
-  return sql<Array<RecipeEntity>>`
-    SELECT r.*, TRUE AS is_favorite
-    FROM recipes r
-    JOIN recipe_favorites rf ON r.id = rf.recipe_id AND rf.user_id = ${userId}
-    WHERE r.created_at < ${cursor}
-    ORDER BY r.created_at DESC
+): Promise<RecipeSearchEntity[]> => {
+  const results = await sql<RecipeSearchEntity[]>`
+    SELECT r.*, CASE WHEN rf.id IS NULL THEN FALSE ELSE TRUE END as is_favorite 
+    FROM recipes r 
+    LEFT JOIN recipe_favorites rf ON r.slug = rf.recipe_slug AND rf.user_id = ${userId}
+    WHERE r.author_id = ${authorId} AND r.deleted_at IS NULL
+    ${cursor ? sql`AND r.created_at < ${cursor}` : sql``}
+    ORDER BY r.created_at DESC 
     LIMIT ${limit as number}
   `;
+  return results;
 };

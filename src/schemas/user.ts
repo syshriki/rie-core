@@ -18,7 +18,6 @@ const username = z
     },
   });
 
-// Output schema for database user entity
 export const userEntitySchema = z
   .object({
     id: z.number().int(),
@@ -27,7 +26,6 @@ export const userEntitySchema = z
   })
   .strict();
 
-// Input schema for user creation
 export const userCreateInputSchema = z
   .object({
     id: z.number().int(),
@@ -35,7 +33,6 @@ export const userCreateInputSchema = z
   })
   .strict();
 
-// Infer TypeScript types from schemas
 export type UserEntity = z.infer<typeof userEntitySchema>;
 export type UserCreateInput = z.infer<typeof userCreateInputSchema>;
 

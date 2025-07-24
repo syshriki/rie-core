@@ -11,12 +11,16 @@ CREATE TABLE users(
    created_at     TIMESTAMPTZ    NOT NULL DEFAULT NOW()
 );
 
+CREATE SEQUENCE recipe_slug START 1;
+
 CREATE TABLE slugs(
    slug           VARCHAR(100) PRIMARY KEY,
    created_at     TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
    deleted_at     TIMESTAMPTZ    ,
    deleted        BOOLEAN NOT NULL DEFAULT FALSE
 );
+
+
 
 CREATE TABLE recipes(
    id             INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -54,17 +58,17 @@ CREATE TABLE recipe_favorites(
 );
 
 CREATE TABLE news(
-   id             BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+   id             INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
    type           VARCHAR(100)                NOT NULL,
    text           VARCHAR(500)                NOT NULL,
    title          VARCHAR(100)                NOT NULL,
-   author         VARCHAR(20)                NOT NULL,
+   author_id      INTEGER                    NOT NULL,
    created_at     TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
    recipe_slug    VARCHAR(100),
    CONSTRAINT fk_news_recipe_slug
       FOREIGN KEY(recipe_slug) 
       REFERENCES slugs(slug),
-   CONSTRAINT fk_news_author
-      FOREIGN KEY(author) 
-      REFERENCES users(username)
+   CONSTRAINT fk_news_author_id
+      FOREIGN KEY(author_id) 
+      REFERENCES users(id)
 );

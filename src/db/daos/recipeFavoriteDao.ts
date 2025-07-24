@@ -47,58 +47,29 @@ export const removeFavorite = async (
   return result.count > 0;
 };
 
-/**
- * Check if a recipe is in user's favorites
- * @param userId - Number
- * @param recipeId - Recipe ID
- * @param sql - SQL client (optional)
- */
-export const isFavorite = async (
-  userId: number,
-  recipeId: number,
-  sql: Sql = defaultSql,
-): Promise<boolean> => {
-  const [favorite] = await sql`
-    SELECT 1 FROM recipe_favorites
-    WHERE user_id = ${userId} AND recipe_id = ${recipeId}
-  `;
-
-  return favorite !== undefined;
-};
-
 export const getFavorites = async (
-  username: string,
+  targetUserId: number,
+  currentUserId: number,
   cursor: string | null = null,
   limit = 10,
   sql: Sql = defaultSql,
 ): Promise<RecipeEntity[]> => {
   const cursorExpression = cursor ? sql`AND r.created_at < ${cursor}` : sql``;
 
-  return sql<RecipeEntity[]>`
-    SELECT r.*, true as is_favorite
+  const results = await sql<RecipeEntity[]>`
+    SELECT 
+      r.*,
+      CASE WHEN rf2.id IS NOT NULL THEN true ELSE false END AS is_favorite
     FROM recipes r
-    JOIN recipe_favorites rf ON r.id = rf.recipe_id
-    WHERE rf.username = ${username}
-    AND r.created_at < ${cursorExpression}
+    INNER JOIN recipe_favorites rf ON r.slug = rf.recipe_slug
+    LEFT JOIN recipe_favorites rf2 ON rf.recipe_slug = rf2.recipe_slug AND rf2.user_id = ${currentUserId}
+    WHERE rf.user_id = ${targetUserId}
+    ${cursorExpression}
     ORDER BY r.created_at DESC
     LIMIT ${limit as number}
   `;
-};
 
-export const getUserIdByUsername = async (
-  username: string,
-  sql: Sql = defaultSql,
-): Promise<number> => {
-  const [user] = await sql`
-    SELECT id FROM users
-    WHERE username = ${username}
-  `;
-
-  if (!user) {
-    return 0; // Return 0 if user not found, which won't match any favorites
-  }
-
-  return user.id as number;
+  return results;
 };
 
 export const deleteByRecipeSlug = async (

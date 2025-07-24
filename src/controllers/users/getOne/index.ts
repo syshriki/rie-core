@@ -8,7 +8,7 @@ export default async (ctx: AppContext): Promise<void> => {
 
   const { userId } = ctx.state;
 
-  const user = await userDao.findById(id);
+  const user = await userDao.findFullUserProfile(id);
 
   if (!user) {
     throw new BadRequestError(`user with id ${id} not found`, 'USER_NOT_FOUND');

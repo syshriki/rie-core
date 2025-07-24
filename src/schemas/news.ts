@@ -6,20 +6,23 @@ import * as z from 'zod/v4';
 
 // Base news schema
 const newsBaseSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(100, 'Title must not exceed 100 characters'),
-  content: z.string().min(1, 'Content is required'),
+  title: z.string().min(1).max(100),
+  text: z.string().min(1).max(500),
+  type: z.string().min(1).max(100),
 });
 
 // Output schema for database news entity
 export const newsEntitySchema = newsBaseSchema.extend({
   id: z.number().int(),
-  recipeId: z.number().int().optional(),
-  createdAt: z.number().int(),
+  authorId: z.number().int(),
+  recipeSlug: z.string().nullable().optional(),
+  createdAt: z.string().or(z.date()),
 });
 
 // Input schema for news creation
 export const newsCreateInputSchema = newsBaseSchema.extend({
-  recipeId: z.number().int().optional(),
+  recipeSlug: z.string().nullable().optional(),
+  authorId: z.number().int(),
 });
 
 // Output schema for news response

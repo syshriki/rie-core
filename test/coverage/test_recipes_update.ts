@@ -30,7 +30,6 @@ describe('PUT /recipes/:slug', () => {
     });
   });
 
-  // Clean up database and create test user and recipe before tests
   beforeEach(async () => {
     await reinitializeDatabase();
     user = await createUser(server, users.user0.token);

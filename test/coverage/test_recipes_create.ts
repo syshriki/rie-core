@@ -45,7 +45,7 @@ describe('POST /recipes', () => {
     expect(response.body).to.have.property('recipe').that.deep.equals(testRecipe.recipe);
     expect(response.body).to.have.property('authorId', 0);
     expect(response.body).to.have.property('createdAt').that.is.a('string');
-    expect(response.body).to.have.property('slug', 'r2');
+    expect(response.body).to.have.property('slug', 'r1');
     expect(response.body).to.have.property('ingredients').that.deep.equals(testRecipe.ingredients);
   });
 
@@ -64,7 +64,7 @@ describe('POST /recipes', () => {
     expect(response.body).to.have.property('recipe').that.deep.equals(testRecipe.recipe);
     expect(response.body).to.have.property('authorId', 0);
     expect(response.body).to.have.property('createdAt').that.is.a('string');
-    expect(response.body).to.have.property('slug', 'r2');
+    expect(response.body).to.have.property('slug', 'r1');
   });
 
   it('should 201 when title has minimum length (1 character)', async () => {
@@ -76,7 +76,7 @@ describe('POST /recipes', () => {
       .expect(201);
 
     expect(response.body).to.have.property('title', 'A');
-    expect(response.body).to.have.property('slug', 'r2');
+    expect(response.body).to.have.property('slug', 'r1');
   });
 
   it('should 201 when title has maximum length (99 characters)', async () => {
@@ -89,7 +89,7 @@ describe('POST /recipes', () => {
       .expect(201);
 
     expect(response.body).to.have.property('title', maxTitle);
-    expect(response.body).to.have.property('slug', 'r2');
+    expect(response.body).to.have.property('slug', 'r1');
   });
 
   it('should 201 when title contains special characters', async () => {
@@ -101,7 +101,7 @@ describe('POST /recipes', () => {
       .expect(201);
 
     expect(response.body).to.have.property('title', specialTitleRecipe.title);
-    expect(response.body).to.have.property('slug', 'r2');
+    expect(response.body).to.have.property('slug', 'r1');
   });
 
   it('should 201 when title has spaces and mixed capitalization', async () => {
@@ -113,7 +113,7 @@ describe('POST /recipes', () => {
       .expect(201);
 
     expect(response.body).to.have.property('title', spacedTitleRecipe.title);
-    expect(response.body).to.have.property('slug', 'r2');
+    expect(response.body).to.have.property('slug', 'r1');
   });
 
   it('should 400 when title exceeds maximum length', async () => {
