@@ -10,6 +10,7 @@ export const recipeFavoriteEntitySchema = z.object({
   id: z.number().int(),
   username: z.string(),
   recipeId: z.number().int(),
+  userId: z.string(),
   createdAt: z.number().int(),
 });
 

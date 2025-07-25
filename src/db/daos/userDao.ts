@@ -10,7 +10,7 @@ export const create = async (user: UserCreateInput, sql: Sql = defaultSql): Prom
   return createdUser as UserEntity;
 };
 
-export const findById = async (id: number, sql: Sql = defaultSql): Promise<UserEntity | null> => {
+export const findById = async (id: string, sql: Sql = defaultSql): Promise<UserEntity | null> => {
   const [user] = await sql`
     SELECT * FROM users 
     WHERE id = ${id} 
@@ -26,7 +26,7 @@ interface UserWithRecipeCounts extends UserEntity {
 }
 
 export const findFullUserProfile = async (
-  id: number,
+  id: string,
   sql: Sql = defaultSql,
 ): Promise<UserWithRecipeCounts | null> => {
   const [profile] = await sql<UserWithRecipeCounts[]>`

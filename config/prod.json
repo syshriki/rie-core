@@ -11,5 +11,10 @@
     },
     "logging": {
         "level": "debug"
+    },
+    "auth": {
+        "jwksUri": "http://opi:8000/applications/1/.well-known/jwks.json",
+        "audience": "app:1",
+        "issuer": "rie-auth"
     }
 }

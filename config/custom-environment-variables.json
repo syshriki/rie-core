@@ -11,5 +11,8 @@
     },
     "logging": {
         "level": "LOG_LEVEL"
+    },
+    "auth": {
+        "jwksUri": "AUTH_JWKS_URI"
     }
 }

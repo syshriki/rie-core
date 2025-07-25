@@ -36,7 +36,7 @@ export const recipeBaseSchema = z.object({
 export const recipeEntitySchema = recipeBaseSchema.extend({
   id: z.number().int(),
   slug: recipeSlug,
-  authorId: z.number().int().positive(),
+  authorId: z.string(),
   createdAt: z.number().int(),
   updatedAt: z.number().int(),
 });
@@ -60,7 +60,7 @@ export const recipeIdParamSchema = z.object({
 
 export type RecipeEntity = z.infer<typeof recipeEntitySchema>;
 export type CreateRecipeInput = z.infer<typeof recipeBaseSchema> & {
-  authorId: number;
+  authorId: string;
   slug: string;
 };
 export type RecipeSearchEntity = z.infer<typeof recipeOutputSchema> & {

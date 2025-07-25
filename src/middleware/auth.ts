@@ -45,7 +45,7 @@ export function createAuthMiddleware(options: AuthOptions = {}) {
         ctx.throw(400, 'invalid token payload');
       }
 
-      ctx.state.userId = Number(payload.sub);
+      ctx.state.userId = payload.sub;
 
       await next();
     } catch (error) {

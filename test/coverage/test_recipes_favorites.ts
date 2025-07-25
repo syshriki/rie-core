@@ -7,6 +7,7 @@ import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../src/app.ts';
 import type { RecipeEntity } from '../../src/schemas/recipe.ts';
+import type { UserEntity } from '../../src/schemas/user.ts';
 import { nockJwks } from '../helpers/auth.ts';
 import { reinitializeDatabase } from '../helpers/dbHelpers.ts';
 import { createRecipe } from '../helpers/recipeHelper.ts';
@@ -16,6 +17,7 @@ import users from '../helpers/users.json' with { type: 'json' };
 describe('POST /recipes/:slug/favorite', () => {
   let server: Server;
   let recipe: RecipeEntity;
+  let user: UserEntity;
 
   before(async () => {
     server = await app();
@@ -31,7 +33,7 @@ describe('POST /recipes/:slug/favorite', () => {
   beforeEach(async () => {
     await reinitializeDatabase();
 
-    await createUser(server, users.user0.token);
+    user = await createUser(server, users.user0.token);
     recipe = await createRecipe(server, users.user0.token);
   });
 
@@ -42,7 +44,7 @@ describe('POST /recipes/:slug/favorite', () => {
       .expect(200);
 
     expect(response.body).to.have.property('recipeSlug', recipe.slug);
-    expect(response.body).to.have.property('userId', 0);
+    expect(response.body).to.have.property('userId', user.id);
   });
 
   it('should require authentication', async () => {

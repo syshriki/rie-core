@@ -24,7 +24,7 @@ export const create = async (
 
 export const findById = async (
   id: number,
-  userId: number,
+  userId: string,
   sql: postgres.Sql = defaultSql,
 ): Promise<RecipeEntity | null> => {
   const [recipe] = await sql`
@@ -40,7 +40,7 @@ export const findById = async (
 
 export const findBySlug = async (
   slug: string,
-  userId: number,
+  userId: string,
   sql: postgres.Sql = defaultSql,
 ): Promise<RecipeEntity | null> => {
   const [recipe] = await sql`
@@ -65,7 +65,7 @@ export const deleteByRecipeSlug = async (
 
 export const search = async (
   searchTerm: string,
-  userId: number,
+  userId: string,
   cursor: Date | null = null,
   limit = 10,
   sql: postgres.Sql = defaultSql,
@@ -82,7 +82,7 @@ export const search = async (
 };
 
 export const findWithFavoriteStatus = async (
-  userId: number,
+  userId: string,
   cursor: number | null = null,
   limit = 10,
   sql: postgres.Sql = defaultSql,
@@ -99,8 +99,8 @@ export const findWithFavoriteStatus = async (
 };
 
 export const findByAuthorId = async (
-  authorId: number,
-  userId: number,
+  authorId: string,
+  userId: string,
   cursor: Date | null = null,
   limit = 10,
   sql: postgres.Sql = defaultSql,

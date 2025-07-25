@@ -9,6 +9,7 @@ import users from '../helpers/users.json' with { type: 'json' };
 
 describe('POST /recipes', () => {
   let server: Server;
+  let user: UserEntity;
   const testRecipe = {
     title: 'Test Recipe',
     description: 'A test recipe description',
@@ -29,7 +30,7 @@ describe('POST /recipes', () => {
 
   beforeEach(async () => {
     await reinitializeDatabase();
-    await createUser(server, users.user0.token);
+    user = await createUser(server, users.user0.token);
   });
 
   it('should 200 with all optional fields', async () => {
@@ -43,7 +44,7 @@ describe('POST /recipes', () => {
     expect(response.body).to.have.property('title', testRecipe.title);
     expect(response.body).to.have.property('description', testRecipe.description);
     expect(response.body).to.have.property('recipe').that.deep.equals(testRecipe.recipe);
-    expect(response.body).to.have.property('authorId', 0);
+    expect(response.body).to.have.property('authorId', user.id);
     expect(response.body).to.have.property('createdAt').that.is.a('string');
     expect(response.body).to.have.property('slug', 'r1');
     expect(response.body).to.have.property('ingredients').that.deep.equals(testRecipe.ingredients);
@@ -62,7 +63,7 @@ describe('POST /recipes', () => {
     expect(response.body).to.have.property('id').that.is.a('number');
     expect(response.body).to.have.property('title', testRecipe.title);
     expect(response.body).to.have.property('recipe').that.deep.equals(testRecipe.recipe);
-    expect(response.body).to.have.property('authorId', 0);
+    expect(response.body).to.have.property('authorId', user.id);
     expect(response.body).to.have.property('createdAt').that.is.a('string');
     expect(response.body).to.have.property('slug', 'r1');
   });

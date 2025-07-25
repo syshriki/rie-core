@@ -41,7 +41,7 @@ describe('POST /users', () => {
       .send({ id: 'testuser' })
       .expect(200);
 
-    expect(body).to.have.property('id', 0);
+    expect(body).to.have.property('id', '0');
     expect(body).to.have.property('username').that.is.a('string');
     expect(body).to.have.property('createdAt').that.is.a('string');
   });

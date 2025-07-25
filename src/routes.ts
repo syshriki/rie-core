@@ -9,6 +9,7 @@ import recipeGetOneController from './controllers/recipes/getOne/index.ts';
 import recipeUpdateController from './controllers/recipes/update/index.ts';
 import userCreateController from './controllers/users/create/index.ts';
 import getUserFavoritesController from './controllers/users/getFavorites/index.ts';
+import userGetMeController from './controllers/users/getMe/index.ts';
 import userGetOneController from './controllers/users/getOne/index.ts';
 import userGetRecipesController from './controllers/users/getRecipes/index.ts';
 import { paginationSchema } from './schemas/pagination.ts';
@@ -46,6 +47,8 @@ const withCookieAuth = createAuthMiddleware({});
 const withBearerAuth = createAuthMiddleware({ useAuthorizationHeader: true });
 
 router.post('/users', withBearerAuth, userCreateController);
+
+router.get('/users/me', withCookieAuth, userGetMeController);
 
 router.get(
   '/users/:id',

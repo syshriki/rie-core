@@ -20,7 +20,7 @@ const username = z
 
 export const userEntitySchema = z
   .object({
-    id: z.number().int(),
+    id: z.string(),
     username,
     createdAt: z.number().int(),
   })
@@ -28,7 +28,7 @@ export const userEntitySchema = z
 
 export const userCreateInputSchema = z
   .object({
-    id: z.number().int(),
+    id: z.string(),
     username: username.optional(),
   })
   .strict();

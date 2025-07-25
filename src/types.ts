@@ -2,7 +2,7 @@ import type { Context } from 'koa';
 import type Koa from 'koa';
 
 export interface AppState {
-  userId: number;
+  userId: string;
 }
 
 export interface ExtendedAppContext extends Context {

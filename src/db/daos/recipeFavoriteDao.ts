@@ -14,7 +14,7 @@ import { sql as defaultSql } from '../connection.ts';
  * @param sql - SQL client (optional)
  */
 export const addFavorite = async (
-  userId: number,
+  userId: string,
   recipeSlug: string,
   sql: Sql = defaultSql,
 ): Promise<RecipeFavoriteEntity> => {
@@ -35,7 +35,7 @@ export const addFavorite = async (
 };
 
 export const removeFavorite = async (
-  userId: number,
+  userId: string,
   recipeSlug: string,
   sql: Sql = defaultSql,
 ): Promise<boolean> => {
@@ -48,8 +48,8 @@ export const removeFavorite = async (
 };
 
 export const getFavorites = async (
-  targetUserId: number,
-  currentUserId: number,
+  targetUserId: string,
+  currentUserId: string,
   cursor: string | null = null,
   limit = 10,
   sql: Sql = defaultSql,
