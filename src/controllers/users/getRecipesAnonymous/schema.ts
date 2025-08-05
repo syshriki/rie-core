@@ -2,7 +2,7 @@ import * as z from 'zod/v4';
 import { paginationSchema } from '../../../schemas/pagination.ts';
 
 export const getUserRecipesParamSchema = z.object({
-  id: z.string(),
+  authorId: z.string(),
 });
 
 export const getUserRecipesQuerySchema = paginationSchema;

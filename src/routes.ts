@@ -5,13 +5,16 @@ import recipeCreateController from './controllers/recipes/create/index.ts';
 import recipeDeleteController from './controllers/recipes/delete/index.ts';
 import recipeRemoveFavoriteController from './controllers/recipes/deleteFavorite/index.ts';
 import recipeGetAllController from './controllers/recipes/getAll/index.ts';
+import recipeGetAllAnonymousController from './controllers/recipes/getAllAnonymous/index.ts';
 import recipeGetOneController from './controllers/recipes/getOne/index.ts';
+import recipeGetOneAnonymousController from './controllers/recipes/getOneAnonymous/index.ts';
 import recipeUpdateController from './controllers/recipes/update/index.ts';
 import userCreateController from './controllers/users/create/index.ts';
 import getUserFavoritesController from './controllers/users/getFavorites/index.ts';
 import userGetMeController from './controllers/users/getMe/index.ts';
 import userGetOneController from './controllers/users/getOne/index.ts';
 import userGetRecipesController from './controllers/users/getRecipes/index.ts';
+import recipeGetUserRecipesController from './controllers/users/getRecipesAnonymous/index.ts';
 import { paginationSchema } from './schemas/pagination.ts';
 
 import newsGetAllController from './controllers/news/getAll/index.ts';
@@ -24,7 +27,9 @@ import { createRecipeBody } from './controllers/recipes/create/schema.ts';
 import { deleteRecipeParam } from './controllers/recipes/delete/schema.ts';
 import { deleteFavoriteParam } from './controllers/recipes/deleteFavorite/schema.ts';
 import { recipeSchemaQuery } from './controllers/recipes/getAll/schema.ts';
+import { recipeSchemaQuery as recipeSchemaQueryAnonymous } from './controllers/recipes/getAllAnonymous/schema.ts';
 import { getOneRecipeParamSchema } from './controllers/recipes/getOne/schema.ts';
+import { getOneRecipeParamSchema as getOneRecipeParamSchemaAnonymous } from './controllers/recipes/getOneAnonymous/schema.ts';
 import {
   updateRecipeBodySchema,
   updateRecipeParamSchema,
@@ -38,6 +43,10 @@ import {
   getUserRecipesParamSchema,
   getUserRecipesQuerySchema,
 } from './controllers/users/getRecipes/schema.ts';
+import {
+  getUserRecipesParamSchema as recipeGetUserParamSchema,
+  getUserRecipesQuerySchema as recipeGetUserQuerySchema,
+} from './controllers/users/getRecipesAnonymous/schema.ts';
 import { createAuthMiddleware } from './middleware/auth.ts';
 import type { AppState, ExtendedAppContext } from './types.ts';
 
@@ -85,6 +94,27 @@ router.get(
   withCookieAuth,
   validateRequest({ params: getOneRecipeParamSchema }),
   recipeGetOneController,
+);
+
+router.get(
+  '/anonymous/recipes',
+  validateRequest({ query: recipeSchemaQueryAnonymous }),
+  recipeGetAllAnonymousController,
+);
+
+router.get(
+  '/anonymous/recipes/:slug',
+  validateRequest({ params: getOneRecipeParamSchemaAnonymous }),
+  recipeGetOneAnonymousController,
+);
+
+router.get(
+  '/anonymous/users/:authorId/recipes',
+  validateRequest({
+    params: recipeGetUserParamSchema,
+    query: recipeGetUserQuerySchema,
+  }),
+  recipeGetUserRecipesController,
 );
 router.put(
   '/recipes/:slug',

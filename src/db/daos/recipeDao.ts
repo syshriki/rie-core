@@ -53,6 +53,19 @@ export const findBySlug = async (
   return recipe as RecipeEntity;
 };
 
+export const findBySlugAnonymous = async (
+  slug: string,
+  sql: postgres.Sql = defaultSql,
+): Promise<RecipeEntity | null> => {
+  const [recipe] = await sql`
+    SELECT r.*, FALSE as is_favorite
+    FROM recipes r
+    WHERE r.slug = ${slug} AND deleted_at is NULL LIMIT 1
+  `;
+
+  return recipe as RecipeEntity;
+};
+
 export const deleteByRecipeSlug = async (
   slug: string,
   sql: postgres.Sql = defaultSql,
@@ -74,6 +87,22 @@ export const search = async (
     SELECT r.*, CASE WHEN rf.id IS NULL THEN FALSE ELSE TRUE END as is_favorite 
     FROM recipes r 
     LEFT JOIN recipe_favorites rf ON r.slug = rf.recipe_slug AND rf.user_id = ${userId}
+    WHERE (title ILIKE ${`%${searchTerm}%`} OR r.description ILIKE ${`%${searchTerm}%`} )
+    ${cursor ? sql`AND r.created_at < ${cursor}` : sql``}
+    ORDER BY r.created_at DESC 
+    LIMIT ${limit as number}
+  `;
+};
+
+export const searchAnonymous = async (
+  searchTerm: string,
+  cursor: Date | null = null,
+  limit = 10,
+  sql: postgres.Sql = defaultSql,
+): Promise<RecipeSearchEntity[]> => {
+  return sql<RecipeSearchEntity[]>`
+    SELECT r.*, FALSE as is_favorite 
+    FROM recipes r 
     WHERE (title ILIKE ${`%${searchTerm}%`} OR r.description ILIKE ${`%${searchTerm}%`} )
     ${cursor ? sql`AND r.created_at < ${cursor}` : sql``}
     ORDER BY r.created_at DESC 
@@ -109,6 +138,23 @@ export const findByAuthorId = async (
     SELECT r.*, CASE WHEN rf.id IS NULL THEN FALSE ELSE TRUE END as is_favorite 
     FROM recipes r 
     LEFT JOIN recipe_favorites rf ON r.slug = rf.recipe_slug AND rf.user_id = ${userId}
+    WHERE r.author_id = ${authorId} AND r.deleted_at IS NULL
+    ${cursor ? sql`AND r.created_at < ${cursor}` : sql``}
+    ORDER BY r.created_at DESC 
+    LIMIT ${limit as number}
+  `;
+  return results;
+};
+
+export const findByAuthorIdAnonymous = async (
+  authorId: string,
+  cursor: Date | null = null,
+  limit = 10,
+  sql: postgres.Sql = defaultSql,
+): Promise<RecipeSearchEntity[]> => {
+  const results = await sql<RecipeSearchEntity[]>`
+    SELECT r.*, FALSE as is_favorite 
+    FROM recipes r 
     WHERE r.author_id = ${authorId} AND r.deleted_at IS NULL
     ${cursor ? sql`AND r.created_at < ${cursor}` : sql``}
     ORDER BY r.created_at DESC 

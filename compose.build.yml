@@ -1,6 +1,6 @@
 services:
-  rie-server:
-    image: 192.168.4.58:5000/rie-server:latest
+  rie-core:
+    image: 192.168.4.58:5000/rie-core:latest
     build: .
     ports:
       - "8001:8001"
