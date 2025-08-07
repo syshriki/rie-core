@@ -3,7 +3,7 @@ import { paginationSchema } from '../../../schemas/pagination.ts';
 
 export const getUserFavoritesParam = z
   .object({
-    id: z.coerce.number().int(),
+    id: z.string(),
   })
   .strict();
 

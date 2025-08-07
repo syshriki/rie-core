@@ -73,14 +73,14 @@ describe('/anonymous/users/:authorId/recipes GET', () => {
       });
     }
 
-    const response = await request(server).get('/anonymous/users/0/recipes?limit=5').expect(200);
+    const response = await request(server).get('/anonymous/users/0/recipes?pageSize=5').expect(200);
 
     expect(response.body.recipes).to.have.length(5);
     expect(response.body).to.have.property('hasMore', true);
     expect(response.body).to.have.property('nextCursor').that.is.a('string');
 
     const nextPage = await request(server)
-      .get(`/anonymous/users/0/recipes?limit=5&cursor=${response.body.nextCursor}`)
+      .get(`/anonymous/users/0/recipes?pageSize=5&cursor=${response.body.nextCursor}`)
       .expect(200);
 
     expect(nextPage.body.recipes).to.have.length(5);
@@ -97,19 +97,5 @@ describe('/anonymous/users/:authorId/recipes GET', () => {
     expect(response.body.recipes).to.have.length(0);
     expect(response.body).to.have.property('hasMore', false);
     expect(response.body).to.have.property('nextCursor', null);
-  });
-
-  it('should mark all recipes as not favorited for anonymous users', async () => {
-    await createRecipe(server, users.user0.token, testRecipe1);
-    await createRecipe(server, users.user0.token, testRecipe2);
-
-    const response = await request(server).get('/anonymous/users/0/recipes').expect(200);
-
-    // Check if favorite status is included and all are not favorited
-    expect(response.body.recipes[0]).to.have.property('isFavorite');
-    const allNotFavorited = response.body.recipes.every(
-      (r: { isFavorite?: boolean }) => r.isFavorite === false,
-    );
-    expect(allNotFavorited).to.be.true;
   });
 });

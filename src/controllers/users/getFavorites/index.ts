@@ -7,7 +7,7 @@ import type { AppContext } from '../../../types.ts';
 import type { GetUserFavoritesParams, GetUserFavoritesQuery } from './schema.ts';
 
 export default async (ctx: AppContext): Promise<void> => {
-  const { cursor, limit = 10 } = ctx.sanitizedRequest.query as GetUserFavoritesQuery;
+  const { cursor, pageSize = 10 } = ctx.sanitizedRequest.query as GetUserFavoritesQuery;
   const { id: targetUserId } = ctx.sanitizedRequest.params as GetUserFavoritesParams;
   const currentUserId = ctx.state.userId;
 
@@ -15,11 +15,11 @@ export default async (ctx: AppContext): Promise<void> => {
     targetUserId,
     currentUserId,
     cursor ? cursor : null,
-    limit,
+    pageSize,
   );
 
   const count = recipes.length;
-  const nextCursor = count < limit ? null : recipes[count - 1].createdAt;
+  const nextCursor = count < pageSize ? null : recipes[count - 1].createdAt;
 
   ctx.body = {
     hasMore: nextCursor !== null,

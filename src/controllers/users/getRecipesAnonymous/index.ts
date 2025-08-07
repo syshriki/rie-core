@@ -8,13 +8,13 @@ import type { GetUserRecipesParam, GetUserRecipesQuery } from './schema.ts';
 
 export default async (ctx: AppContext): Promise<void> => {
   const { authorId } = ctx.sanitizedRequest.params as GetUserRecipesParam;
-  const { cursor, limit = 10 } = ctx.sanitizedRequest.query as GetUserRecipesQuery;
+  const { cursor, pageSize = 10 } = ctx.sanitizedRequest.query as GetUserRecipesQuery;
 
   const cursorDate = cursor ? new Date(cursor) : null;
 
-  const rawRecipes = await recipeDao.findByAuthorIdAnonymous(authorId, cursorDate, limit + 1);
+  const rawRecipes = await recipeDao.findByAuthorIdAnonymous(authorId, cursorDate, pageSize + 1);
 
-  const hasMore = rawRecipes.length > limit;
+  const hasMore = rawRecipes.length > pageSize;
   if (hasMore) {
     rawRecipes.pop();
   }

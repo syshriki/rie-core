@@ -97,7 +97,7 @@ describe('GET /users/:id/favorites', () => {
     await request(server).get(`/users/${user.id}/favorites`).expect(401);
   });
 
-  it('should 200 when requesting paginated results with limit parameter', async () => {
+  it('should 200 when requesting paginated results with pageSize parameter', async () => {
     // Create multiple recipes for pagination testing
     const recipes = [];
     for (let i = 0; i < 5; i++) {
@@ -106,10 +106,10 @@ describe('GET /users/:id/favorites', () => {
       await createFavorite(server, users.user0.token, newRecipe.slug);
     }
 
-    // Get favorites with a limit of 2
+    // Get favorites with a pageSize of 2
     const response = await request(server)
       .get(`/users/${user.id}/favorites`)
-      .query({ limit: 2 })
+      .query({ pageSize: 2 })
       .set('Cookie', [`access_token=${users.user0.token}`])
       .expect(200);
 
@@ -122,7 +122,7 @@ describe('GET /users/:id/favorites', () => {
     const nextCursor = response.body.nextCursor;
     const secondPageResponse = await request(server)
       .get(`/users/${user.id}/favorites`)
-      .query({ limit: 2, cursor: nextCursor })
+      .query({ pageSize: 2, cursor: nextCursor })
       .set('Cookie', [`access_token=${users.user0.token}`])
       .expect(200);
 

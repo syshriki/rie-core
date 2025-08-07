@@ -83,6 +83,7 @@ describe('GET /recipes', () => {
     // Favorite a recipe for favorite status testing
     const getResponse = await request(server)
       .get('/recipes')
+      .query({ page: 1, pageSize: 10 })
       .set('Cookie', [`access_token=${users.user0.token}`]);
 
     const recipeSlug = getResponse.body.recipes[0].slug;
@@ -149,9 +150,9 @@ describe('GET /recipes', () => {
     expect(response.body).to.have.property('nextCursor').that.is.a('string');
   });
 
-  it('should honor custom limit parameter', async () => {
+  it('should honor custom pageSize parameter', async () => {
     const response = await request(server)
-      .get('/recipes?limit=5')
+      .get('/recipes?pageSize=5')
       .set('Cookie', [`access_token=${users.user0.token}`])
       .expect(200);
 
@@ -163,7 +164,7 @@ describe('GET /recipes', () => {
   it('should return correct next page with cursor-based pagination', async () => {
     // Get first page
     const firstPage = await request(server)
-      .get('/recipes?limit=5')
+      .get('/recipes?pageSize=5')
       .set('Cookie', [`access_token=${users.user0.token}`])
       .expect(200);
 
@@ -172,7 +173,7 @@ describe('GET /recipes', () => {
 
     // Get second page using the cursor
     const secondPage = await request(server)
-      .get(`/recipes?limit=5&cursor=${firstPage.body.nextCursor}`)
+      .get(`/recipes?pageSize=5&cursor=${firstPage.body.nextCursor}`)
       .set('Cookie', [`access_token=${users.user0.token}`])
       .expect(200);
 
@@ -184,7 +185,7 @@ describe('GET /recipes', () => {
   it('should set hasMore=false on the last page', async () => {
     // We have 13 total recipes, getting all with a limit higher than that
     const response = await request(server)
-      .get('/recipes?limit=15')
+      .get('/recipes?pageSize=15')
       .set('Cookie', [`access_token=${users.user0.token}`])
       .expect(200);
 
@@ -196,7 +197,7 @@ describe('GET /recipes', () => {
   it('should set nextCursor=null when no more results', async () => {
     // First, get all recipes to find out total count
     const allRecipes = await request(server)
-      .get('/recipes?limit=15') // Limit higher than total count
+      .get('/recipes?pageSize=15') // Limit higher than total count
       .set('Cookie', [`access_token=${users.user0.token}`])
       .expect(200);
 
@@ -204,7 +205,7 @@ describe('GET /recipes', () => {
 
     // Now get with exact limit
     const response = await request(server)
-      .get(`/recipes?limit=${totalCount}`)
+      .get(`/recipes?pageSize=${totalCount}`)
       .set('Cookie', [`access_token=${users.user0.token}`])
       .expect(200);
 
@@ -212,6 +213,47 @@ describe('GET /recipes', () => {
     expect(response.body.recipes).to.have.length(totalCount);
     expect(response.body).to.have.property('hasMore', false);
     expect(response.body).to.have.property('nextCursor', null);
+  });
+
+  it('should support page-based pagination', async () => {
+    const response = await request(server)
+      .get('/recipes?page=1&pageSize=5')
+      .set('Cookie', [`access_token=${users.user0.token}`])
+      .expect(200);
+
+    expect(response.body).to.have.property('recipes').that.is.an('array');
+    expect(response.body.recipes).to.have.length(5);
+
+    expect(response.body).to.have.property('pagination');
+    expect(response.body.pagination).to.have.property('currentPage', 1);
+    expect(response.body.pagination).to.have.property('pageSize', 5);
+    expect(response.body.pagination).to.have.property('totalPages').that.is.a('number');
+    expect(response.body.pagination).to.have.property('totalItems').that.is.a('number');
+    expect(response.body.pagination).to.have.property('hasNextPage').that.is.a('boolean');
+    expect(response.body.pagination).to.have.property('hasPreviousPage', false);
+  });
+
+  it('should navigate through pages with page-based pagination', async () => {
+    // Get page 1
+    const page1 = await request(server)
+      .get('/recipes?page=1&pageSize=5')
+      .set('Cookie', [`access_token=${users.user0.token}`])
+      .expect(200);
+
+    // Get page 2
+    const page2 = await request(server)
+      .get('/recipes?page=2&pageSize=5')
+      .set('Cookie', [`access_token=${users.user0.token}`])
+      .expect(200);
+
+    // Ensure we got different results
+    expect(page1.body.recipes).to.have.length(5);
+    expect(page2.body.recipes).to.have.length(5);
+    expect(page1.body.recipes[0].id).to.not.equal(page2.body.recipes[0].id);
+
+    // Check pagination metadata is correct for page 2
+    expect(page2.body.pagination).to.have.property('currentPage', 2);
+    expect(page2.body.pagination).to.have.property('hasPreviousPage', true);
   });
 
   it('should include correct is_favorite status for favorited recipes', async () => {
@@ -234,5 +276,12 @@ describe('GET /recipes', () => {
       (recipe: any) => recipe.isFavorite === false,
     );
     expect(allUnfavorited).to.be.true;
+  });
+
+  it('should reject requests with pageSize exceeding 100', async () => {
+    await request(server)
+      .get('/recipes?page=1&pageSize=101')
+      .set('Cookie', [`access_token=${users.user0.token}`])
+      .expect(400);
   });
 });

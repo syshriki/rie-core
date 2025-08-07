@@ -58,7 +58,7 @@ export const findBySlugAnonymous = async (
   sql: postgres.Sql = defaultSql,
 ): Promise<RecipeEntity | null> => {
   const [recipe] = await sql`
-    SELECT r.*, FALSE as is_favorite
+    SELECT r.*
     FROM recipes r
     WHERE r.slug = ${slug} AND deleted_at is NULL LIMIT 1
   `;
@@ -76,11 +76,29 @@ export const deleteByRecipeSlug = async (
   return result.count > 0;
 };
 
-export const search = async (
+export const pageSearch = async (
   searchTerm: string,
   userId: string,
-  cursor: Date | null = null,
-  limit = 10,
+  page: number,
+  pageSize: number,
+  sql: postgres.Sql = defaultSql,
+): Promise<RecipeSearchEntity[]> => {
+  const offset = (page - 1) * pageSize;
+  return sql<RecipeSearchEntity[]>`
+      SELECT r.*, CASE WHEN rf.id IS NULL THEN FALSE ELSE TRUE END as is_favorite 
+      FROM recipes r 
+      LEFT JOIN recipe_favorites rf ON r.slug = rf.recipe_slug AND rf.user_id = ${userId}
+      WHERE (title ILIKE ${`%${searchTerm}%`} OR r.description ILIKE ${`%${searchTerm}%`} )
+      ORDER BY r.created_at DESC 
+      LIMIT ${pageSize as number} OFFSET ${offset as number}
+    `;
+};
+
+export const cursorSearch = async (
+  searchTerm: string,
+  userId: string,
+  pageSize: number,
+  cursor?: Date,
   sql: postgres.Sql = defaultSql,
 ): Promise<RecipeSearchEntity[]> => {
   return sql<RecipeSearchEntity[]>`
@@ -90,30 +108,73 @@ export const search = async (
     WHERE (title ILIKE ${`%${searchTerm}%`} OR r.description ILIKE ${`%${searchTerm}%`} )
     ${cursor ? sql`AND r.created_at < ${cursor}` : sql``}
     ORDER BY r.created_at DESC 
-    LIMIT ${limit as number}
+    LIMIT ${pageSize as number}
   `;
 };
 
-export const searchAnonymous = async (
+export const pageSearchAnonymous = async (
   searchTerm: string,
-  cursor: Date | null = null,
-  limit = 10,
+  page: number,
+  pageSize: number,
   sql: postgres.Sql = defaultSql,
-): Promise<RecipeSearchEntity[]> => {
-  return sql<RecipeSearchEntity[]>`
-    SELECT r.*, FALSE as is_favorite 
+): Promise<RecipeEntity[]> => {
+  const offset = (page - 1) * pageSize;
+  return sql<RecipeEntity[]>`
+      SELECT r.* 
+      FROM recipes r 
+      WHERE (title ILIKE ${`%${searchTerm}%`} OR r.description ILIKE ${`%${searchTerm}%`} )
+      ORDER BY r.created_at DESC 
+      LIMIT ${pageSize as number} OFFSET ${offset as number}
+    `;
+};
+
+export const cursorSearchAnonymous = async (
+  searchTerm: string,
+  pageSize: number,
+  cursor?: Date,
+  sql: postgres.Sql = defaultSql,
+): Promise<RecipeEntity[]> => {
+  return sql<RecipeEntity[]>`
+    SELECT r.*
     FROM recipes r 
     WHERE (title ILIKE ${`%${searchTerm}%`} OR r.description ILIKE ${`%${searchTerm}%`} )
     ${cursor ? sql`AND r.created_at < ${cursor}` : sql``}
     ORDER BY r.created_at DESC 
-    LIMIT ${limit as number}
+    LIMIT ${pageSize as number}
   `;
+};
+
+export const getRecipeCount = async (
+  searchTerm: string,
+  _userId: string, // Parameter kept for API consistency but not used in query
+  sql: postgres.Sql = defaultSql,
+): Promise<number> => {
+  const [result] = await sql<[{ count: number }]>`
+    SELECT COUNT(*) as count
+    FROM recipes r 
+    WHERE (title ILIKE ${`%${searchTerm}%`} OR r.description ILIKE ${`%${searchTerm}%`} )
+  `;
+
+  return Number(result.count);
+};
+
+export const getRecipeCountAnonymous = async (
+  searchTerm: string,
+  sql: postgres.Sql = defaultSql,
+): Promise<number> => {
+  const [result] = await sql<[{ count: number }]>`
+    SELECT COUNT(*) as count
+    FROM recipes r 
+    WHERE (title ILIKE ${`%${searchTerm}%`} OR r.description ILIKE ${`%${searchTerm}%`} )
+  `;
+
+  return Number(result.count);
 };
 
 export const findWithFavoriteStatus = async (
   userId: string,
   cursor: number | null = null,
-  limit = 10,
+  pageSize = 10,
   sql: postgres.Sql = defaultSql,
 ): Promise<Array<RawRecipeEntity>> => {
   return sql<RawRecipeEntity[]>`
@@ -123,7 +184,7 @@ export const findWithFavoriteStatus = async (
     LEFT JOIN recipe_favorites rf ON r.id = rf.recipe_id AND rf.user_id = ${userId}
     ${cursor ? sql`{WHERE r.created_at < ${cursor}` : sql``}
     ORDER BY r.created_at DESC
-    LIMIT ${limit as number}
+    LIMIT ${pageSize as number}
   `;
 };
 
@@ -131,7 +192,7 @@ export const findByAuthorId = async (
   authorId: string,
   userId: string,
   cursor: Date | null = null,
-  limit = 10,
+  pageSize = 10,
   sql: postgres.Sql = defaultSql,
 ): Promise<RecipeSearchEntity[]> => {
   const results = await sql<RecipeSearchEntity[]>`
@@ -141,7 +202,7 @@ export const findByAuthorId = async (
     WHERE r.author_id = ${authorId} AND r.deleted_at IS NULL
     ${cursor ? sql`AND r.created_at < ${cursor}` : sql``}
     ORDER BY r.created_at DESC 
-    LIMIT ${limit as number}
+    LIMIT ${pageSize as number}
   `;
   return results;
 };
@@ -149,16 +210,16 @@ export const findByAuthorId = async (
 export const findByAuthorIdAnonymous = async (
   authorId: string,
   cursor: Date | null = null,
-  limit = 10,
+  pageSize = 10,
   sql: postgres.Sql = defaultSql,
-): Promise<RecipeSearchEntity[]> => {
-  const results = await sql<RecipeSearchEntity[]>`
-    SELECT r.*, FALSE as is_favorite 
+): Promise<RecipeEntity[]> => {
+  const results = await sql<RecipeEntity[]>`
+    SELECT r.*
     FROM recipes r 
     WHERE r.author_id = ${authorId} AND r.deleted_at IS NULL
     ${cursor ? sql`AND r.created_at < ${cursor}` : sql``}
     ORDER BY r.created_at DESC 
-    LIMIT ${limit as number}
+    LIMIT ${pageSize as number}
   `;
   return results;
 };

@@ -46,16 +46,6 @@ describe('GET /anonymous/recipes/:slug', () => {
     expect(response.body).to.have.property('recipe').that.deep.equals(recipe.recipe);
   });
 
-  it('should mark the recipe as not favorited for anonymous users', async () => {
-    // First mark the recipe as a favorite for an authenticated user
-    await createFavorite(server, users.user1.token, recipe.slug);
-
-    // Then retrieve the recipe anonymously
-    const response = await request(server).get(`/anonymous/recipes/${recipe.slug}`).expect(200);
-
-    expect(response.body).to.have.property('isFavorite', false);
-  });
-
   it('should return 400 when recipe does not exist', async () => {
     await request(server).get('/anonymous/recipes/non-existent-slug').expect(400);
   });

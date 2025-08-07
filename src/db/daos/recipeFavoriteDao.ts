@@ -51,7 +51,7 @@ export const getFavorites = async (
   targetUserId: string,
   currentUserId: string,
   cursor: string | null = null,
-  limit = 10,
+  pageSize = 10,
   sql: Sql = defaultSql,
 ): Promise<RecipeEntity[]> => {
   const cursorExpression = cursor ? sql`AND r.created_at < ${cursor}` : sql``;
@@ -66,7 +66,7 @@ export const getFavorites = async (
     WHERE rf.user_id = ${targetUserId}
     ${cursorExpression}
     ORDER BY r.created_at DESC
-    LIMIT ${limit as number}
+    LIMIT ${pageSize as number}
   `;
 
   return results;

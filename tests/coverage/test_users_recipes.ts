@@ -77,7 +77,7 @@ describe('/users/:id/recipes GET', () => {
     }
 
     const response = await request(server)
-      .get('/users/0/recipes?limit=5')
+      .get('/users/0/recipes?pageSize=5')
       .set('Cookie', [`access_token=${users.user0.token}`])
       .expect(200);
 
@@ -86,7 +86,7 @@ describe('/users/:id/recipes GET', () => {
     expect(response.body).to.have.property('nextCursor').that.is.a('string');
 
     const nextPage = await request(server)
-      .get(`/users/0/recipes?limit=5&cursor=${response.body.nextCursor}`)
+      .get(`/users/0/recipes?pageSize=5&cursor=${response.body.nextCursor}`)
       .set('Cookie', [`access_token=${users.user0.token}`])
       .expect(200);
 
