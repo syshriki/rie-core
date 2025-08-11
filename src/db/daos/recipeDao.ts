@@ -47,7 +47,7 @@ export const findBySlug = async (
     SELECT r.*, CASE WHEN recipe_favorites.id IS NULL THEN FALSE ELSE TRUE END as is_favorite
     FROM recipes r
     LEFT JOIN recipe_favorites ON r.slug = recipe_favorites.recipe_slug AND recipe_favorites.user_id = ${userId}
-    WHERE r.slug = ${slug} AND deleted_at is NULL LIMIT 1
+    WHERE r.slug = ${slug} AND  deleted = FALSE LIMIT 1
   `;
 
   return recipe as RecipeEntity;
@@ -88,7 +88,7 @@ export const pageSearch = async (
       SELECT r.*, CASE WHEN rf.id IS NULL THEN FALSE ELSE TRUE END as is_favorite 
       FROM recipes r 
       LEFT JOIN recipe_favorites rf ON r.slug = rf.recipe_slug AND rf.user_id = ${userId}
-      WHERE (title ILIKE ${`%${searchTerm}%`} OR r.description ILIKE ${`%${searchTerm}%`} )
+      WHERE (title ILIKE ${`%${searchTerm}%`} OR r.description ILIKE ${`%${searchTerm}%`} ) and deleted = FALSE
       ORDER BY r.created_at DESC 
       LIMIT ${pageSize as number} OFFSET ${offset as number}
     `;
@@ -105,7 +105,7 @@ export const cursorSearch = async (
     SELECT r.*, CASE WHEN rf.id IS NULL THEN FALSE ELSE TRUE END as is_favorite 
     FROM recipes r 
     LEFT JOIN recipe_favorites rf ON r.slug = rf.recipe_slug AND rf.user_id = ${userId}
-    WHERE (title ILIKE ${`%${searchTerm}%`} OR r.description ILIKE ${`%${searchTerm}%`} )
+    WHERE (title ILIKE ${`%${searchTerm}%`} OR r.description ILIKE ${`%${searchTerm}%`} ) and deleted = FALSE
     ${cursor ? sql`AND r.created_at < ${cursor}` : sql``}
     ORDER BY r.created_at DESC 
     LIMIT ${pageSize as number}
@@ -122,7 +122,7 @@ export const pageSearchAnonymous = async (
   return sql<RecipeEntity[]>`
       SELECT r.* 
       FROM recipes r 
-      WHERE (title ILIKE ${`%${searchTerm}%`} OR r.description ILIKE ${`%${searchTerm}%`} )
+      WHERE (title ILIKE ${`%${searchTerm}%`} OR r.description ILIKE ${`%${searchTerm}%`} )  and deleted = FALSE
       ORDER BY r.created_at DESC 
       LIMIT ${pageSize as number} OFFSET ${offset as number}
     `;
@@ -137,7 +137,7 @@ export const cursorSearchAnonymous = async (
   return sql<RecipeEntity[]>`
     SELECT r.*
     FROM recipes r 
-    WHERE (title ILIKE ${`%${searchTerm}%`} OR r.description ILIKE ${`%${searchTerm}%`} )
+    WHERE (title ILIKE ${`%${searchTerm}%`} OR r.description ILIKE ${`%${searchTerm}%`} ) and deleted = FALSE
     ${cursor ? sql`AND r.created_at < ${cursor}` : sql``}
     ORDER BY r.created_at DESC 
     LIMIT ${pageSize as number}
@@ -152,7 +152,7 @@ export const getRecipeCount = async (
   const [result] = await sql<[{ count: number }]>`
     SELECT COUNT(*) as count
     FROM recipes r 
-    WHERE (title ILIKE ${`%${searchTerm}%`} OR r.description ILIKE ${`%${searchTerm}%`} )
+    WHERE (title ILIKE ${`%${searchTerm}%`} OR r.description ILIKE ${`%${searchTerm}%`} ) and deleted = FALSE
   `;
 
   return Number(result.count);
@@ -165,7 +165,7 @@ export const getRecipeCountAnonymous = async (
   const [result] = await sql<[{ count: number }]>`
     SELECT COUNT(*) as count
     FROM recipes r 
-    WHERE (title ILIKE ${`%${searchTerm}%`} OR r.description ILIKE ${`%${searchTerm}%`} )
+    WHERE (title ILIKE ${`%${searchTerm}%`} OR r.description ILIKE ${`%${searchTerm}%`} ) and deleted = FALSE
   `;
 
   return Number(result.count);

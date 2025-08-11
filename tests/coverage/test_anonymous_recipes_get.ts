@@ -156,4 +156,40 @@ describe('GET /anonymous/recipes', () => {
   it('should reject anonymous requests with pageSize exceeding 100', async () => {
     await request(server).get('/anonymous/recipes?page=1&pageSize=101').expect(400);
   });
+
+  it('should not include soft-deleted recipes in search results', async () => {
+    const createResponse = await request(server)
+      .post('/recipes')
+      .set('Cookie', [`access_token=${users.user0.token}`])
+      .send({
+        ...testRecipe,
+        title: 'Recipe To Delete',
+        description: 'This recipe will be deleted',
+      })
+      .expect(201);
+
+    const recipeSlug = createResponse.body.slug;
+
+    const beforeDeleteResponse = await request(server)
+      .get('/recipes?q=Recipe To Delete')
+      .set('Cookie', [`access_token=${users.user0.token}`])
+      .expect(200);
+
+    expect(beforeDeleteResponse.body.recipes).to.be.an('array');
+    expect(beforeDeleteResponse.body.recipes.length).to.equal(1);
+    expect(beforeDeleteResponse.body.recipes[0].title).to.equal('Recipe To Delete');
+
+    await request(server)
+      .delete(`/recipes/${recipeSlug}`)
+      .set('Cookie', [`access_token=${users.user0.token}`])
+      .expect(204);
+
+    const afterDeleteResponse = await request(server)
+      .get('/anonymous/recipes?q=Recipe To Delete')
+      .set('Cookie', [`access_token=${users.user0.token}`])
+      .expect(200);
+
+    expect(afterDeleteResponse.body.recipes).to.be.an('array');
+    expect(afterDeleteResponse.body.recipes.length).to.equal(0);
+  });
 });
