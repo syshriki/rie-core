@@ -14,7 +14,7 @@ import { createFavorite, createRecipe } from '../helpers/recipeHelper.ts';
 import { createUser } from '../helpers/userHelper.ts';
 import users from '../helpers/users.json' with { type: 'json' };
 
-describe('PUT /recipes/:slug', () => {
+describe('/recipes/:slug PUT', () => {
   let server: Server;
   let recipe: RecipeEntity;
   let user: UserEntity;

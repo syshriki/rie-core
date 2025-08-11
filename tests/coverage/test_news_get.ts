@@ -13,7 +13,7 @@ import { createNews } from '../helpers/newsHelper.ts';
 import { createUser } from '../helpers/userHelper.ts';
 import users from '../helpers/users.json' with { type: 'json' };
 
-describe('GET /news', () => {
+describe('/news GET', () => {
   let server: Server;
   let user: UserEntity;
 

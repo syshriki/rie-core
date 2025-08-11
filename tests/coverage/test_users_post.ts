@@ -12,7 +12,7 @@ import { nockJwks } from '../helpers/auth.ts';
 import { reinitializeDatabase } from '../helpers/dbHelpers.ts';
 import users from '../helpers/users.json' with { type: 'json' };
 
-describe('POST /users', () => {
+describe('/users POST', () => {
   let server: Server;
   let mathRandomStub: sinon.SinonStub;
   before(async () => {

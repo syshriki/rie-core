@@ -59,6 +59,9 @@ export const recipeIdParamSchema = z.object({
 });
 
 export type RecipeEntity = z.infer<typeof recipeEntitySchema>;
+
+export type RecipeWAuthorEntity = RecipeEntity & { authorUsername: string };
+
 export type CreateRecipeInput = z.infer<typeof recipeBaseSchema> & {
   authorId: string;
   slug: string;

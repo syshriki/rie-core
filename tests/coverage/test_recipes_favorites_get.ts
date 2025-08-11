@@ -13,7 +13,7 @@ import { createFavorite, createRecipe } from '../helpers/recipeHelper.ts';
 import { createUser } from '../helpers/userHelper.ts';
 import users from '../helpers/users.json' with { type: 'json' };
 
-describe('GET /users/:id/favorites', () => {
+describe('/users/:id/favorites GET', () => {
   let server: Server;
   let user: UserEntity;
   let secondUser: UserEntity;

@@ -14,7 +14,7 @@ import { createRecipe } from '../helpers/recipeHelper.ts';
 import { createUser } from '../helpers/userHelper.ts';
 import users from '../helpers/users.json' with { type: 'json' };
 
-describe('POST /recipes/:slug/favorite', () => {
+describe('/recipes/:slug/favorite POST', () => {
   let server: Server;
   let recipe: RecipeEntity;
   let user: UserEntity;

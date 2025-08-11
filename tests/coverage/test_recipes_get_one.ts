@@ -14,7 +14,7 @@ import { createRecipe } from '../helpers/recipeHelper.ts';
 import { createUser } from '../helpers/userHelper.ts';
 import users from '../helpers/users.json' with { type: 'json' };
 
-describe('GET /recipes/:slug', () => {
+describe('/recipes/:slug GET', () => {
   let server: Server;
   let recipe: RecipeEntity;
   let user: UserEntity;
@@ -49,6 +49,7 @@ describe('GET /recipes/:slug', () => {
     expect(response.body).to.have.property('ingredients').that.deep.equals(recipe.ingredients);
     expect(response.body).to.have.property('recipe').that.deep.equals(recipe.recipe);
     expect(response.body).to.have.property('authorId', user.id);
+    expect(response.body.authorUsername).to.be.a('string');
   });
 
   it('should 400 for non-existent recipe', async () => {

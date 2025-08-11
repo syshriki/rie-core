@@ -22,7 +22,7 @@ export const newsEntitySchema = newsBaseSchema.extend({
 // Input schema for news creation
 export const newsCreateInputSchema = newsBaseSchema.extend({
   recipeSlug: z.string().nullable().optional(),
-  authorId: z.number().int(),
+  authorId: z.string(),
 });
 
 // Output schema for news response
@@ -44,7 +44,7 @@ export const newsIdParamSchema = z.object({
 export const newsSearchQuerySchema = z.object({
   recipeId: z.coerce.number().int().optional(),
   cursor: z.coerce.number().int().optional().nullable(),
-  limit: z.coerce.number().int().positive().default(10).optional(),
+  pageSize: z.coerce.number().int().positive().default(10).optional(),
 });
 
 // Infer TypeScript types from schemas

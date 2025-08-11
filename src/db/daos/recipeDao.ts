@@ -1,6 +1,11 @@
 import type postgres from 'postgres';
 
-import type { CreateRecipeInput, RecipeEntity, RecipeSearchEntity } from '../../schemas/recipe.ts';
+import type {
+  CreateRecipeInput,
+  RecipeEntity,
+  RecipeSearchEntity,
+  RecipeWAuthorEntity,
+} from '../../schemas/recipe.ts';
 import { sql as defaultSql } from '../connection.ts';
 
 type RawRecipeEntity = CreateRecipeInput & {
@@ -42,28 +47,30 @@ export const findBySlug = async (
   slug: string,
   userId: string,
   sql: postgres.Sql = defaultSql,
-): Promise<RecipeEntity | null> => {
+): Promise<RecipeWAuthorEntity | null> => {
   const [recipe] = await sql`
-    SELECT r.*, CASE WHEN recipe_favorites.id IS NULL THEN FALSE ELSE TRUE END as is_favorite
+    SELECT r.*, CASE WHEN recipe_favorites.id IS NULL THEN FALSE ELSE TRUE END as is_favorite, u.username as author_username
     FROM recipes r
     LEFT JOIN recipe_favorites ON r.slug = recipe_favorites.recipe_slug AND recipe_favorites.user_id = ${userId}
+    LEFT JOIN users u ON r.author_id = u.id
     WHERE r.slug = ${slug} AND  deleted = FALSE LIMIT 1
   `;
 
-  return recipe as RecipeEntity;
+  return recipe as RecipeWAuthorEntity;
 };
 
 export const findBySlugAnonymous = async (
   slug: string,
   sql: postgres.Sql = defaultSql,
-): Promise<RecipeEntity | null> => {
+): Promise<RecipeWAuthorEntity | null> => {
   const [recipe] = await sql`
-    SELECT r.*
+    SELECT r.*, u.username as author_username
     FROM recipes r
+    LEFT JOIN users u ON r.author_id = u.id
     WHERE r.slug = ${slug} AND deleted_at is NULL LIMIT 1
   `;
 
-  return recipe as RecipeEntity;
+  return recipe as RecipeWAuthorEntity;
 };
 
 export const deleteByRecipeSlug = async (

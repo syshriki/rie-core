@@ -29,7 +29,7 @@ export const userFavoritesOutputSchema = z.object({
 // Schema for favorite search query params
 export const favoriteSearchQuerySchema = z.object({
   cursor: z.coerce.number().int().optional().nullable(),
-  limit: z.coerce.number().int().positive().default(10).optional(),
+  pageSize: z.coerce.number().int().positive().default(10).optional(),
 });
 
 // Infer TypeScript types from schemas

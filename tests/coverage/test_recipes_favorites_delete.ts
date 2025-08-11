@@ -8,7 +8,7 @@ import { createFavorite, createRecipe } from '../helpers/recipeHelper.ts';
 import { createUser } from '../helpers/userHelper.ts';
 import users from '../helpers/users.json' with { type: 'json' };
 
-describe('DELETE /recipes/:slug/favorite', () => {
+describe('/recipes/:slug/favorite DELETE', () => {
   let server: Server;
   let recipe: RecipeEntity;
 

@@ -13,7 +13,7 @@ import { createFavorite, createRecipe } from '../helpers/recipeHelper.ts';
 import { createUser } from '../helpers/userHelper.ts';
 import users from '../helpers/users.json' with { type: 'json' };
 
-describe('GET /anonymous/recipes/:slug', () => {
+describe('/anonymous/recipes/:slug GET', () => {
   let server: Server;
   let recipe: RecipeEntity;
 
@@ -44,6 +44,7 @@ describe('GET /anonymous/recipes/:slug', () => {
     expect(response.body).to.have.property('description', recipe.description);
     expect(response.body).to.have.property('ingredients').that.deep.equals(recipe.ingredients);
     expect(response.body).to.have.property('recipe').that.deep.equals(recipe.recipe);
+    expect(response.body.authorUsername).to.be.a.string;
   });
 
   it('should return 400 when recipe does not exist', async () => {

@@ -11,7 +11,7 @@ import { reinitializeDatabase } from '../helpers/dbHelpers.ts';
 import { createUser } from '../helpers/userHelper.ts';
 import users from '../helpers/users.json' with { type: 'json' };
 
-describe('GET /recipes', () => {
+describe('/recipes GET', () => {
   let server: Server;
   const testRecipe = {
     title: 'Test Recipe',

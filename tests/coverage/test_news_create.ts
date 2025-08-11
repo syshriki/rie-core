@@ -13,7 +13,7 @@ import { createRecipe } from '../helpers/recipeHelper.ts';
 import { createUser } from '../helpers/userHelper.ts';
 import users from '../helpers/users.json' with { type: 'json' };
 
-describe('POST /news', () => {
+describe('/news POST', () => {
   let server: Server;
   let user: UserEntity;
 
