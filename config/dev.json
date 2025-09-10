@@ -1,7 +1,10 @@
 {
     "db": {
+        "host": "postgres",
         "port": 5432,
-        "database": "rie_core"
+        "database": "rie_core",
+        "user": "postgres",
+        "password": "postgres"
     },
     "auth": {
         "jwksUri": "http://rie-auth:8000/applications/1/.well-known/jwks.json",
