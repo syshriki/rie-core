@@ -2,7 +2,7 @@ import type { Server } from 'node:http';
 import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../src/app.ts';
-import type { UserEntity } from '../../src/schemas/user.ts';
+import type { Output as UserOutput } from '../../src/types/public/users/create.ts';
 import { nockJwks } from '../helpers/auth.ts';
 import { reinitializeDatabase } from '../helpers/dbHelpers.ts';
 import { createFavorite, createRecipe } from '../helpers/recipeHelper.ts';
@@ -11,8 +11,8 @@ import users from '../helpers/users.json' with { type: 'json' };
 
 describe('/users/:id GET', () => {
   let server: Server;
-  let user0: UserEntity;
-  let user1: UserEntity;
+  let user0: UserOutput;
+  let user1: UserOutput;
 
   before(async () => {
     server = await app();

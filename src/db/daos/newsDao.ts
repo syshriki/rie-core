@@ -10,6 +10,26 @@ export const create = async (news: NewsCreateInput, sql: Sql = defaultSql): Prom
   return createdNews as NewsEntity;
 };
 
+export const deleteByAuthorId = async (
+  authorId: string,
+  sql: Sql = defaultSql,
+): Promise<number> => {
+  const result = await sql`
+    DELETE FROM news WHERE author_id = ${authorId}
+  `;
+  return result.count;
+};
+
+export const deleteByRecipeSlugs = async (
+  slugs: string[],
+  sql: Sql = defaultSql,
+): Promise<number> => {
+  const result = await sql`
+    DELETE FROM news WHERE recipe_slug = ANY(${slugs})
+  `;
+  return result.count;
+};
+
 export const findAll = async (
   cursor: string | null = null,
   limit = 10,

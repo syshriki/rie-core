@@ -4,15 +4,18 @@
 
 import * as newsDao from '../../../db/daos/newsDao.ts';
 import { foreignKeyErrorHandler } from '../../../db/utils.ts';
+import type { NewsEntity } from '../../../schemas/news.ts';
 import type { AppContext } from '../../../types.ts';
 import type { CreateNewsBody } from './schema.ts';
 
-export default async (ctx: AppContext): Promise<void> => {
-  const { title, text, type, recipeSlug } = ctx.sanitizedRequest.body as CreateNewsBody;
+export default async (
+  ctx: AppContext<{ ReqBody: CreateNewsBody; RespBody: NewsEntity }>,
+): Promise<void> => {
+  const { title, text, type, recipeSlug } = ctx.sanitizedRequest.body!;
 
   const { userId } = ctx.state;
 
-  const news = await newsDao
+  const news = (await newsDao
     .create({
       title,
       text,
@@ -26,7 +29,7 @@ export default async (ctx: AppContext): Promise<void> => {
         code: 'RECIPE_NOT_FOUND',
         constraint: 'fk_news_recipe_slug',
       }),
-    );
+    ))!;
 
   ctx.status = 201;
   ctx.body = news;

@@ -3,12 +3,15 @@
  */
 
 import * as recipeDao from '../../../db/daos/recipeDao.ts';
+import type { Output as RecipesResponse } from '../../../types/public/users/getRecipes.ts';
 import type { AppContext } from '../../../types.ts';
 import type { GetUserRecipesParam, GetUserRecipesQuery } from './schema.ts';
 
-export default async (ctx: AppContext): Promise<void> => {
-  const { id } = ctx.sanitizedRequest.params as GetUserRecipesParam;
-  const { cursor, pageSize = 10 } = ctx.sanitizedRequest.query as GetUserRecipesQuery;
+export default async (
+  ctx: AppContext<{ Params: GetUserRecipesParam; Query: GetUserRecipesQuery; RespBody: RecipesResponse }>,
+): Promise<void> => {
+  const { id } = ctx.sanitizedRequest.params!;
+  const { cursor, pageSize = 10 } = ctx.sanitizedRequest.query!;
 
   const { userId } = ctx.state;
 

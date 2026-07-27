@@ -5,15 +5,27 @@ export interface AppState {
   userId: string;
 }
 
-export interface ExtendedAppContext extends Context {
+export interface ExtendedAppContext<
+  P = never,
+  Q = never,
+  B = never,
+> extends Context {
   sanitizedRequest: {
-    params?: object;
-    query?: object;
-    body?: object;
+    params?: P;
+    query?: Q;
+    body?: B;
   };
 }
 
-export type AppContext = Koa.ParameterizedContext<AppState, ExtendedAppContext>;
+export type AppContext<O = {}> = Koa.ParameterizedContext<
+  AppState,
+  ExtendedAppContext<
+    O extends { Params: infer P } ? P : never,
+    O extends { Query: infer Q } ? Q : never,
+    O extends { ReqBody: infer B } ? B : never
+  >,
+  O extends { RespBody: infer R } ? R : unknown
+>;
 
 // Database entity interfaces
 export interface User {

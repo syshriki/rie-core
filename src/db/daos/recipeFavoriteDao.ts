@@ -3,7 +3,7 @@
  */
 
 import type { Sql } from 'postgres';
-import type { RecipeEntity } from '../../schemas/recipe.ts';
+import type { RecipeWithFavorite } from '../../schemas/recipe.ts';
 import type { RecipeFavoriteEntity } from '../../schemas/recipeFavorite.ts';
 import { sql as defaultSql } from '../connection.ts';
 
@@ -53,10 +53,10 @@ export const getFavorites = async (
   cursor: string | null = null,
   pageSize = 10,
   sql: Sql = defaultSql,
-): Promise<RecipeEntity[]> => {
+): Promise<RecipeWithFavorite[]> => {
   const cursorExpression = cursor ? sql`AND r.created_at < ${cursor}` : sql``;
 
-  const results = await sql<RecipeEntity[]>`
+  const results = await sql<RecipeWithFavorite[]>`
     SELECT 
       r.*,
       CASE WHEN rf2.id IS NOT NULL THEN true ELSE false END AS is_favorite
@@ -70,6 +70,28 @@ export const getFavorites = async (
   `;
 
   return results;
+};
+
+export const deleteByRecipeSlugs = async (
+  recipeSlugs: string[],
+  sql: Sql = defaultSql,
+): Promise<number> => {
+  const result = await sql`
+    DELETE FROM recipe_favorites
+    WHERE recipe_slug = ANY(${recipeSlugs})
+  `;
+  return result.count;
+};
+
+export const deleteByUserId = async (
+  userId: string,
+  sql: Sql = defaultSql,
+): Promise<number> => {
+  const result = await sql`
+    DELETE FROM recipe_favorites
+    WHERE user_id = ${userId}
+  `;
+  return result.count;
 };
 
 export const deleteByRecipeSlug = async (

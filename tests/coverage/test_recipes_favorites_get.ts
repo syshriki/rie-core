@@ -2,23 +2,23 @@ import type { Server } from 'node:http';
 import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../src/app.ts';
-import type { RecipeEntity } from '../../src/schemas/recipe.ts';
-interface RecipeWithFavorite extends RecipeEntity {
-  isFavorite: boolean;
-}
-import type { UserEntity } from '../../src/schemas/user.ts';
+import type { Output as RecipeOutput } from '../../src/types/public/recipes/create.ts';
+import type { Output as UserOutput } from '../../src/types/public/users/create.ts';
+import type { Output as FavoritesOutput } from '../../src/types/public/users/getFavorites.ts';
 import { nockJwks } from '../helpers/auth.ts';
 import { reinitializeDatabase } from '../helpers/dbHelpers.ts';
 import { createFavorite, createRecipe } from '../helpers/recipeHelper.ts';
 import { createUser } from '../helpers/userHelper.ts';
 import users from '../helpers/users.json' with { type: 'json' };
 
+type FavoritesItem = FavoritesOutput['recipes'][number];
+
 describe('/users/:id/favorites GET', () => {
   let server: Server;
-  let user: UserEntity;
-  let secondUser: UserEntity;
-  let recipe: RecipeEntity;
-  let secondRecipe: RecipeEntity;
+  let user: UserOutput;
+  let secondUser: UserOutput;
+  let recipe: RecipeOutput;
+  let secondRecipe: RecipeOutput;
 
   before(async () => {
     server = await app();
@@ -59,11 +59,11 @@ describe('/users/:id/favorites GET', () => {
 
     // Find recipe1 in the response
     const recipe1Response = response.body.recipes.find(
-      (r: RecipeWithFavorite) => r.id === recipe.id,
+      (r: FavoritesItem) => r.id === recipe.id,
     );
     // Find recipe2 in the response
     const recipe2Response = response.body.recipes.find(
-      (r: RecipeWithFavorite) => r.id === secondRecipe.id,
+      (r: FavoritesItem) => r.id === secondRecipe.id,
     );
 
     // User1 has favorited recipe1, so isFavorite should be true
@@ -87,7 +87,7 @@ describe('/users/:id/favorites GET', () => {
     expect(response.body.recipes).to.be.an('array').with.lengthOf(2);
 
     // All recipes should have isFavorite set to true since user is viewing their own favorites
-    for (const recipe of response.body.recipes as RecipeWithFavorite[]) {
+    for (const recipe of response.body.recipes as FavoritesItem[]) {
       expect(recipe).to.have.property('isFavorite', true);
     }
   });

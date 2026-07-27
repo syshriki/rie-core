@@ -10,16 +10,19 @@ interface ValidationSchema {
 
 export default (schema: ValidationSchema) => {
   return async (ctx: AppContext, next: Next): Promise<void> => {
-    ctx.sanitizedRequest = {};
+    const req = ctx.sanitizedRequest as Record<string, unknown>;
+    req.params = undefined;
+    req.query = undefined;
+    req.body = undefined;
     ctx.log.debug({ body: ctx.request.body, query: ctx.query, params: ctx.params });
     if (schema.params) {
-      ctx.sanitizedRequest.params = schema.params.parse(ctx.params);
+      req.params = schema.params.parse(ctx.params);
     }
     if (schema.query) {
-      ctx.sanitizedRequest.query = schema.query.parse(ctx.query);
+      req.query = schema.query.parse(ctx.query);
     }
     if (schema.body) {
-      ctx.sanitizedRequest.body = schema.body.parse(ctx.request.body);
+      req.body = schema.body.parse(ctx.request.body);
     }
     await next();
   };

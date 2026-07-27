@@ -73,6 +73,27 @@ export const findBySlugAnonymous = async (
   return recipe as RecipeWAuthorEntity;
 };
 
+export const findSlugsByAuthorId = async (
+  authorId: string,
+  sql: postgres.Sql = defaultSql,
+): Promise<string[]> => {
+  const rows = await sql<Array<{ slug: string }>>`
+    SELECT slug FROM recipes
+    WHERE author_id = ${authorId}
+  `;
+  return rows.map((r) => r.slug);
+};
+
+export const hardDeleteByAuthorId = async (
+  authorId: string,
+  sql: postgres.Sql = defaultSql,
+): Promise<number> => {
+  const result = await sql`
+    DELETE FROM recipes WHERE author_id = ${authorId}
+  `;
+  return result.count;
+};
+
 export const deleteByRecipeSlug = async (
   slug: string,
   sql: postgres.Sql = defaultSql,

@@ -3,11 +3,14 @@ import type postgres from 'postgres';
 import { sql } from '../../../db/connection.ts';
 import * as recipeDao from '../../../db/daos/recipeDao.ts';
 import * as slugDao from '../../../db/daos/slugDao.ts';
+import type { RecipeEntity } from '../../../schemas/recipe.ts';
 import type { AppContext } from '../../../types.ts';
 import type { CreateRecipeBody } from './schema.ts';
 
-export default async (ctx: AppContext): Promise<void> => {
-  const recipeData = ctx.sanitizedRequest.body as CreateRecipeBody;
+export default async (
+  ctx: AppContext<{ ReqBody: CreateRecipeBody; RespBody: RecipeEntity }>,
+): Promise<void> => {
+  const recipeData = ctx.sanitizedRequest.body!;
 
   await sql.begin(async (transaction: postgres.Sql) => {
     const { slug } = await slugDao.createRecipeSlug(transaction);

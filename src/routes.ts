@@ -10,6 +10,7 @@ import recipeGetOneController from './controllers/recipes/getOne/index.ts';
 import recipeGetOneAnonymousController from './controllers/recipes/getOneAnonymous/index.ts';
 import recipeUpdateController from './controllers/recipes/update/index.ts';
 import userCreateController from './controllers/users/create/index.ts';
+import userDeleteController from './controllers/users/delete/index.ts';
 import getUserFavoritesController from './controllers/users/getFavorites/index.ts';
 import userGetMeController from './controllers/users/getMe/index.ts';
 import userGetOneController from './controllers/users/getOne/index.ts';
@@ -39,6 +40,7 @@ import {
   getUserFavoritesQuery,
 } from './controllers/users/getFavorites/schema.ts';
 import { getOneUserParam } from './controllers/users/getOne/schema.ts';
+import { deleteUserParam } from './controllers/users/delete/schema.ts';
 import {
   getUserRecipesParamSchema,
   getUserRecipesQuerySchema,
@@ -64,6 +66,13 @@ router.get(
   withCookieAuth,
   validateRequest({ params: getOneUserParam }),
   userGetOneController,
+);
+
+router.delete(
+  '/users/:id',
+  withCookieAuth,
+  validateRequest({ params: deleteUserParam }),
+  userDeleteController,
 );
 
 router.get(

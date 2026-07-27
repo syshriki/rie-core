@@ -6,8 +6,8 @@ import type { Server } from 'node:http';
 import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../src/app.ts';
-import type { RecipeEntity } from '../../src/schemas/recipe.ts';
-import type { UserEntity } from '../../src/schemas/user.ts';
+import type { Output as RecipeOutput } from '../../src/types/public/recipes/create.ts';
+import type { Output as UserOutput } from '../../src/types/public/users/create.ts';
 import { nockJwks } from '../helpers/auth.ts';
 import { reinitializeDatabase } from '../helpers/dbHelpers.ts';
 import { createFavorite, createRecipe } from '../helpers/recipeHelper.ts';
@@ -16,8 +16,8 @@ import users from '../helpers/users.json' with { type: 'json' };
 
 describe('/recipes/:slug PUT', () => {
   let server: Server;
-  let recipe: RecipeEntity;
-  let user: UserEntity;
+  let recipe: RecipeOutput;
+  let user: UserOutput;
 
   before(async () => {
     server = await app();

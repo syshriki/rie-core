@@ -16,6 +16,7 @@ const logger = pino();
 initializeErrorHandler();
 
 const createApp = async (): Promise<http.Server> => {
+  logger.info(`starting ${process.env.NODE_ENV} server...`);
   const app = new Koa<AppState, ExtendedAppContext>({ proxy: true });
   const sqlClient = await createSqlClient();
 

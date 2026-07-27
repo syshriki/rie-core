@@ -48,3 +48,7 @@ jspm_packages/
 
 # Docker volumes
 postgres-data/
+
+# Generated OpenAPI spec and client
+openapi.yaml
+client/

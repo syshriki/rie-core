@@ -11,8 +11,8 @@ import { BadRequestError, ForbiddenError } from '../../../httpErrors.ts';
 import type { AppContext } from '../../../types.ts';
 import type { DeleteRecipeParams } from './schema.ts';
 
-export default async (ctx: AppContext): Promise<void> => {
-  const { slug } = ctx.sanitizedRequest.params as DeleteRecipeParams;
+export default async (ctx: AppContext<{ Params: DeleteRecipeParams; RespBody: void }>): Promise<void> => {
+  const { slug } = ctx.sanitizedRequest.params!;
   const { userId } = ctx.state;
 
   const recipe = await recipeDao.findBySlug(slug, userId);

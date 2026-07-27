@@ -9,7 +9,9 @@
         "prod": "NODE_ENV=prod node src/server.ts",
         "check": "tsc --noEmit",
         "test": "NODE_ENV=test mocha",
-        "lint": "biome lint ."
+        "lint": "biome lint .",
+        "openapi": "node scripts/aggregate-openapi.js",
+        "gen-client": "npm run openapi && npx @hey-api/openapi-ts -c @hey-api/client-fetch -i openapi.yaml -o client/"
     },
     "dependencies": {
         "@koa/cors": "^5.0.0",
@@ -28,6 +30,7 @@
         "zod": "^3.22.2"
     },
     "devDependencies": {
+        "@hey-api/openapi-ts": "^0.99.0",
         "@types/chai": "^5.2.2",
         "@types/config": "^3.3.5",
         "@types/koa": "^2.15.0",
@@ -43,6 +46,7 @@
         "@types/supertest": "^6.0.3",
         "biome": "^0.3.3",
         "chai": "^4.3.7",
+        "js-yaml": "^5.2.2",
         "mocha": "^10.2.0",
         "nock": "^14.0.5",
         "nodemon": "^3.0.1",

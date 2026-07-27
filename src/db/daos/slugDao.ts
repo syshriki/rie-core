@@ -34,6 +34,16 @@ export const findOne = async (
   return foundSlug as SlugEntity;
 };
 
+export const deleteBySlugs = async (
+  slugs: string[],
+  sql: postgres.Sql = defaultSql,
+): Promise<number> => {
+  const result = await sql`
+    DELETE FROM slugs WHERE slug = ANY(${slugs})
+  `;
+  return result.count;
+};
+
 export const deleteSlug = async (
   slug: string,
   sql: postgres.Sql = defaultSql,

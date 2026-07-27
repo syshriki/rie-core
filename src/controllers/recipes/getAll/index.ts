@@ -3,19 +3,20 @@
  */
 
 import * as recipeDao from '../../../db/daos/recipeDao.ts';
+import type { CursorResponse, Output as RecipesOutput, PageResponse } from '../../../types/public/recipes/getAll.ts';
 import type { AppContext } from '../../../types.ts';
 import type { RecipeSearchQuery } from './schema.ts';
 
-export default async (ctx: AppContext): Promise<void> => {
-  const { q, cursor, page, pageSize } = ctx.sanitizedRequest.query as RecipeSearchQuery;
+export default async (
+  ctx: AppContext<{ Query: RecipeSearchQuery; RespBody: RecipesOutput }>,
+): Promise<void> => {
+  const { q, cursor, page, pageSize } = ctx.sanitizedRequest.query!;
 
   const { userId } = ctx.state;
 
-  // If page-based pagination is requested
   if (page !== undefined) {
     const rawRecipes = await recipeDao.pageSearch(q, userId, page, pageSize);
 
-    // For page-based pagination, we need to get the total count for calculating total pages
     const recipeCount = await recipeDao.getRecipeCount(q, userId);
     const totalCount = recipeCount;
     const totalPages = Math.ceil(recipeCount / pageSize);
@@ -34,7 +35,6 @@ export default async (ctx: AppContext): Promise<void> => {
     return;
   }
 
-  // Default cursor-based pagination
   const rawRecipes = await recipeDao.cursorSearch(q, userId, pageSize + 1, cursor);
 
   const hasMore = rawRecipes.length > pageSize;

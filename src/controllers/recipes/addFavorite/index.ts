@@ -1,10 +1,14 @@
 import * as recipeDao from '../../../db/daos/recipeDao.ts';
 import * as recipeFavoriteDao from '../../../db/daos/recipeFavoriteDao.ts';
 import errors from '../../../httpErrors.ts';
+import type { RecipeFavoriteEntity } from '../../../schemas/recipeFavorite.ts';
 import type { AppContext } from '../../../types.ts';
+import type { CreateFavoriteParam } from './schema.ts';
 
-export default async (ctx: AppContext): Promise<void> => {
-  const { slug } = ctx.sanitizedRequest.params as { slug: string };
+export default async (
+  ctx: AppContext<{ Params: CreateFavoriteParam; RespBody: RecipeFavoriteEntity }>,
+): Promise<void> => {
+  const { slug } = ctx.sanitizedRequest.params!;
 
   const { userId } = ctx.state;
 

@@ -3,11 +3,14 @@
  */
 
 import * as recipeDao from '../../../db/daos/recipeDao.ts';
+import type { CursorResponse, Output as RecipesOutput, PageResponse } from '../../../types/public/recipes/getAllAnonymous.ts';
 import type { AppContext } from '../../../types.ts';
 import type { RecipeSearchQuery } from './schema.ts';
 
-export default async (ctx: AppContext): Promise<void> => {
-  const { q, cursor, page, pageSize } = ctx.sanitizedRequest.query as RecipeSearchQuery;
+export default async (
+  ctx: AppContext<{ Query: RecipeSearchQuery; RespBody: RecipesOutput }>,
+): Promise<void> => {
+  const { q, cursor, page, pageSize } = ctx.sanitizedRequest.query!;
 
   if (page !== undefined) {
     const rawRecipes = await recipeDao.pageSearchAnonymous(q, page, pageSize);

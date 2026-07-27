@@ -60,15 +60,15 @@ export const recipeIdParamSchema = z.object({
 
 export type RecipeEntity = z.infer<typeof recipeEntitySchema>;
 
-export type RecipeWAuthorEntity = RecipeEntity & { authorUsername: string };
+export type RecipeWithFavorite = z.infer<typeof recipeOutputSchema>;
+
+export type RecipeWAuthorEntity = RecipeWithFavorite & { authorUsername: string };
 
 export type CreateRecipeInput = z.infer<typeof recipeBaseSchema> & {
   authorId: string;
   slug: string;
 };
-export type RecipeSearchEntity = z.infer<typeof recipeOutputSchema> & {
-  isFavorite: boolean;
-};
+export type RecipeSearchEntity = RecipeWithFavorite;
 export type RecipesOutput = z.infer<typeof recipesOutputSchema>;
 export type RecipeIdParam = z.infer<typeof recipeIdParamSchema>;
 

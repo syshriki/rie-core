@@ -7,7 +7,7 @@ import { generateUniqueUsername } from './userNameGenerator.ts';
 
 const maxTries = 5;
 
-export default async (ctx: AppContext): Promise<void> => {
+export default async (ctx: AppContext<{ RespBody: UserEntity }>): Promise<void> => {
   const { userId } = ctx.state;
 
   ctx.log.debug({ id: userId }, 'creating user');

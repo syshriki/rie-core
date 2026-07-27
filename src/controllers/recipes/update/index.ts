@@ -2,12 +2,15 @@ import _ from 'lodash';
 import { sql } from '../../../db/connection.ts';
 import * as recipeDao from '../../../db/daos/recipeDao.ts';
 import { BadRequestError, ForbiddenError } from '../../../httpErrors.ts';
+import type { RecipeEntity } from '../../../schemas/recipe.ts';
 import type { AppContext } from '../../../types.ts';
 import type { UpdateRecipeBody, UpdateRecipeParam } from './schema.ts';
 
-export default async (ctx: AppContext): Promise<void> => {
-  const { slug } = ctx.sanitizedRequest.params as UpdateRecipeParam;
-  const recipePayload = ctx.sanitizedRequest.body as UpdateRecipeBody;
+export default async (
+  ctx: AppContext<{ Params: UpdateRecipeParam; ReqBody: UpdateRecipeBody; RespBody: RecipeEntity }>,
+): Promise<void> => {
+  const { slug } = ctx.sanitizedRequest.params!;
+  const recipePayload = ctx.sanitizedRequest.body!;
   const { userId } = ctx.state;
 
   const recipe = await recipeDao.findBySlug(slug, userId);

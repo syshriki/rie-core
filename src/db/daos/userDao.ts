@@ -10,6 +10,16 @@ export const create = async (user: UserCreateInput, sql: Sql = defaultSql): Prom
   return createdUser as UserEntity;
 };
 
+export const deleteById = async (
+  id: string,
+  sql: Sql = defaultSql,
+): Promise<boolean> => {
+  const result = await sql`
+    DELETE FROM users WHERE id = ${id}
+  `;
+  return result.count > 0;
+};
+
 export const findById = async (id: string, sql: Sql = defaultSql): Promise<UserEntity | null> => {
   const [user] = await sql`
     SELECT * FROM users 

@@ -1,8 +1,9 @@
 import * as userDao from '../../../db/daos/userDao.ts';
 import { BadRequestError } from '../../../httpErrors.ts';
+import type { Output as UserProfile } from '../../../types/public/users/getMe.ts';
 import type { AppContext } from '../../../types.ts';
 
-export default async (ctx: AppContext): Promise<void> => {
+export default async (ctx: AppContext<{ RespBody: UserProfile }>): Promise<void> => {
   const { userId } = ctx.state;
 
   const user = await userDao.findFullUserProfile(userId);
