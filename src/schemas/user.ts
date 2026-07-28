@@ -22,7 +22,7 @@ export const userEntitySchema = z
   .object({
     id: z.string(),
     username,
-    createdAt: z.number().int(),
+    createdAt: z.string(),
   })
   .strict();
 

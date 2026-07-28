@@ -10,6 +10,7 @@ interface ValidationSchema {
 
 export default (schema: ValidationSchema) => {
   return async (ctx: AppContext, next: Next): Promise<void> => {
+    ctx.sanitizedRequest = ctx.sanitizedRequest ?? {};
     const req = ctx.sanitizedRequest as Record<string, unknown>;
     req.params = undefined;
     req.query = undefined;

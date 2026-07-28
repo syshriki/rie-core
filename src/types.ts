@@ -30,7 +30,7 @@ export type AppContext<O = {}> = Koa.ParameterizedContext<
 // Database entity interfaces
 export interface User {
   username: string;
-  createdAt: number;
+  createdAt: string;
 }
 
 // Generic pagination result type
