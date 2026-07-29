@@ -16,6 +16,7 @@ import userGetMeController from './controllers/users/getMe/index.ts';
 import userGetOneController from './controllers/users/getOne/index.ts';
 import userGetRecipesController from './controllers/users/getRecipes/index.ts';
 import recipeGetUserRecipesController from './controllers/users/getRecipesAnonymous/index.ts';
+import userUpdateController from './controllers/users/update/index.ts';
 import { paginationSchema } from './schemas/pagination.ts';
 
 import newsGetAllController from './controllers/news/getAll/index.ts';
@@ -41,6 +42,7 @@ import {
 } from './controllers/users/getFavorites/schema.ts';
 import { getOneUserParam } from './controllers/users/getOne/schema.ts';
 import { deleteUserParam } from './controllers/users/delete/schema.ts';
+import { updateUserBodySchema } from './controllers/users/update/schema.ts';
 import {
   getUserRecipesParamSchema,
   getUserRecipesQuerySchema,
@@ -73,6 +75,15 @@ router.delete(
   withCookieAuth,
   validateRequest({ params: deleteUserParam }),
   userDeleteController,
+);
+
+router.patch(
+  '/users/me',
+  withCookieAuth,
+  validateRequest({
+    body: updateUserBodySchema,
+  }),
+  userUpdateController,
 );
 
 router.get(

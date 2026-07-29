@@ -3,7 +3,7 @@
  * Auth: Cookie
  */
 
-import type { RecipeSearchQuery } from '../../../controllers/recipes/getAll/schema.ts';
+import type { RecipeSearchQuery } from './schema.ts';
 import type { RecipeWithFavorite } from '../../../schemas/recipe.ts';
 
 export type Input = RecipeSearchQuery;

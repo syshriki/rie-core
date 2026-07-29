@@ -5,7 +5,7 @@
 import type {
   GetUserRecipesParam,
   GetUserRecipesQuery,
-} from '../../../controllers/users/getRecipesAnonymous/schema.ts';
+} from './schema.ts';
 import type { RecipeEntity } from '../../../schemas/recipe.ts';
 
 export interface Input {

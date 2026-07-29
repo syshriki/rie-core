@@ -6,7 +6,7 @@
 import type {
   UpdateRecipeBody,
   UpdateRecipeParam,
-} from '../../../controllers/recipes/update/schema.ts';
+} from './schema.ts';
 import type { RecipeEntity } from '../../../schemas/recipe.ts';
 
 export interface Input {

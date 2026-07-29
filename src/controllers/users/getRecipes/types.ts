@@ -6,7 +6,7 @@
 import type {
   GetUserRecipesParam,
   GetUserRecipesQuery,
-} from '../../../controllers/users/getRecipes/schema.ts';
+} from './schema.ts';
 import type { RecipeSearchEntity } from '../../../schemas/recipe.ts';
 
 export interface Input {

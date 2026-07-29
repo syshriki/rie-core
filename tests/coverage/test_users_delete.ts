@@ -6,7 +6,7 @@ import type { Server } from 'node:http';
 import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../src/app.ts';
-import type { Output as UserOutput } from '../../src/types/public/users/create.ts';
+import type { Output as UserOutput } from '../../src/controllers/users/create/types.ts';
 import { nockJwks } from '../helpers/auth.ts';
 import { reinitializeDatabase } from '../helpers/dbHelpers.ts';
 import { createFavorite, createRecipe } from '../helpers/recipeHelper.ts';

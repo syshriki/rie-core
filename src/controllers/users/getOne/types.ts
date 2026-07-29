@@ -3,7 +3,7 @@
  * Auth: Cookie
  */
 
-import type { GetOneUserParams } from '../../../controllers/users/getOne/schema.ts';
+import type { GetOneUserParams } from './schema.ts';
 import type { UserEntity } from '../../../schemas/user.ts';
 
 export type Input = GetOneUserParams;

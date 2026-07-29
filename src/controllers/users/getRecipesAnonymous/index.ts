@@ -3,7 +3,7 @@
  */
 
 import * as recipeDao from '../../../db/daos/recipeDao.ts';
-import type { Output as RecipesResponse } from '../../../types/public/users/getRecipesAnonymous.ts';
+import type { Output as RecipesResponse } from './types.ts';
 import type { AppContext } from '../../../types.ts';
 import type { GetUserRecipesParam, GetUserRecipesQuery } from './schema.ts';
 

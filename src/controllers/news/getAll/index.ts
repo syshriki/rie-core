@@ -1,5 +1,5 @@
 import * as newsDao from '../../../db/daos/newsDao.ts';
-import type { Output as NewsListResponse } from '../../../types/public/news/getAll.ts';
+import type { Output as NewsListResponse } from './types.ts';
 import type { PaginationQuery } from '../../../schemas/pagination.ts';
 import type { AppContext } from '../../../types.ts';
 

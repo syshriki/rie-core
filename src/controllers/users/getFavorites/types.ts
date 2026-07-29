@@ -6,7 +6,7 @@
 import type {
   GetUserFavoritesParams,
   GetUserFavoritesQuery,
-} from '../../../controllers/users/getFavorites/schema.ts';
+} from './schema.ts';
 import type { RecipeWithFavorite } from '../../../schemas/recipe.ts';
 
 export interface Input {

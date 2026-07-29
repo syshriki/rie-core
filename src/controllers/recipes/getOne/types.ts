@@ -3,7 +3,7 @@
  * Auth: Cookie
  */
 
-import type { GetOneParam } from '../../../controllers/recipes/getOne/schema.ts';
+import type { GetOneParam } from './schema.ts';
 import type { RecipeEntity } from '../../../schemas/recipe.ts';
 
 export type Input = GetOneParam;

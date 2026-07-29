@@ -2,7 +2,7 @@
  * GET /anonymous/recipes — Search and list recipes (no auth)
  */
 
-import type { RecipeSearchQuery } from '../../../controllers/recipes/getAllAnonymous/schema.ts';
+import type { RecipeSearchQuery } from './schema.ts';
 import type { RecipeEntity } from '../../../schemas/recipe.ts';
 
 export type Input = RecipeSearchQuery;

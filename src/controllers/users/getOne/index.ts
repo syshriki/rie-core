@@ -1,6 +1,6 @@
 import * as userDao from '../../../db/daos/userDao.ts';
 import { BadRequestError } from '../../../httpErrors.ts';
-import type { Output as UserProfile } from '../../../types/public/users/getOne.ts';
+import type { Output as UserProfile } from './types.ts';
 import type { AppContext } from '../../../types.ts';
 import type { GetOneUserParams } from './schema.ts';
 

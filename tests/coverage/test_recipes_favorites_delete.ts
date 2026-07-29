@@ -1,7 +1,7 @@
 import type { Server } from 'node:http';
 import request from 'supertest';
 import app from '../../src/app.ts';
-import type { Output as RecipeOutput } from '../../src/types/public/recipes/create.ts';
+import type { Output as RecipeOutput } from '../../src/controllers/recipes/create/types.ts';
 import { nockJwks } from '../helpers/auth.ts';
 import { reinitializeDatabase } from '../helpers/dbHelpers.ts';
 import { createFavorite, createRecipe } from '../helpers/recipeHelper.ts';

@@ -20,6 +20,18 @@ export const deleteById = async (
   return result.count > 0;
 };
 
+export const updateUsername = async (
+  id: string,
+  username: string,
+  sql: Sql = defaultSql,
+): Promise<UserEntity> => {
+  const [updatedUser] = await sql`
+    UPDATE users SET username = ${username} WHERE id = ${id}
+    RETURNING *
+  `;
+  return updatedUser as UserEntity;
+};
+
 export const findById = async (id: string, sql: Sql = defaultSql): Promise<UserEntity | null> => {
   const [user] = await sql`
     SELECT * FROM users 

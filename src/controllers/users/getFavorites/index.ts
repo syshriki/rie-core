@@ -3,7 +3,7 @@
  */
 
 import * as recipeFavoriteDao from '../../../db/daos/recipeFavoriteDao.ts';
-import type { Output as FavoritesResponse } from '../../../types/public/users/getFavorites.ts';
+import type { Output as FavoritesResponse } from './types.ts';
 import type { AppContext } from '../../../types.ts';
 import type { GetUserFavoritesParams, GetUserFavoritesQuery } from './schema.ts';
 

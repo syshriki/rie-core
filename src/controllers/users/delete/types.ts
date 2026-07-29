@@ -3,7 +3,7 @@
  * Auth: Cookie
  */
 
-import type { DeleteUserParams } from '../../../controllers/users/delete/schema.ts';
+import type { DeleteUserParams } from './schema.ts';
 
 export type Input = DeleteUserParams;
 

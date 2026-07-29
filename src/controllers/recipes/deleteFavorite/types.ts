@@ -3,7 +3,7 @@
  * Auth: Cookie
  */
 
-import type { DeleteFavoriteParams } from '../../../controllers/recipes/deleteFavorite/schema.ts';
+import type { DeleteFavoriteParams } from './schema.ts';
 
 export type Input = DeleteFavoriteParams;
 

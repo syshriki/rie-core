@@ -3,7 +3,7 @@
  */
 
 import * as recipeDao from '../../../db/daos/recipeDao.ts';
-import type { CursorResponse, Output as RecipesOutput, PageResponse } from '../../../types/public/recipes/getAll.ts';
+import type { CursorResponse, Output as RecipesOutput, PageResponse } from './types.ts';
 import type { AppContext } from '../../../types.ts';
 import type { RecipeSearchQuery } from './schema.ts';
 

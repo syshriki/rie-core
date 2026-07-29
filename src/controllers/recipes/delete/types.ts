@@ -3,7 +3,7 @@
  * Auth: Cookie
  */
 
-import type { DeleteRecipeParams } from '../../../controllers/recipes/delete/schema.ts';
+import type { DeleteRecipeParams } from './schema.ts';
 
 export type Input = DeleteRecipeParams;
 
