@@ -1,0 +1,25 @@
+/recipes:
+  get:
+    tags: [Recipes]
+    summary: Search and list recipes
+    operationId: searchRecipes
+    security:
+      - cookieAuth: []
+    parameters:
+      - $ref: '#/components/parameters/q'
+      - $ref: '#/components/parameters/cursor'
+      - $ref: '#/components/parameters/page'
+      - $ref: '#/components/parameters/pageSize'
+    responses:
+      '200':
+        description: Paginated recipe list (cursor or page-based)
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/RecipesCursorResponse'
+                - $ref: '#/components/schemas/RecipesPageResponse'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+      '401':
+        $ref: '#/components/responses/Unauthorized'

@@ -1,0 +1,21 @@
+/anonymous/recipes:
+  get:
+    tags: [Anonymous]
+    summary: Search and list recipes (no auth)
+    operationId: searchRecipesAnonymous
+    parameters:
+      - $ref: '#/components/parameters/q'
+      - $ref: '#/components/parameters/cursor'
+      - $ref: '#/components/parameters/page'
+      - $ref: '#/components/parameters/pageSize'
+    responses:
+      '200':
+        description: Paginated recipe list (cursor or page-based)
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/RecipesCursorResponseAnon'
+                - $ref: '#/components/schemas/RecipesPageResponseAnon'
+      '400':
+        $ref: '#/components/responses/BadRequest'

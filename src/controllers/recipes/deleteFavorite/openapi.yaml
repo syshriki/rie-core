@@ -1,0 +1,16 @@
+/recipes/{slug}/favorite:
+  delete:
+    tags: [Recipes]
+    summary: Remove a recipe from favorites
+    operationId: removeFavorite
+    security:
+      - cookieAuth: []
+    parameters:
+      - $ref: '#/components/parameters/slug'
+    responses:
+      '204':
+        description: Favorite removed
+      '400':
+        $ref: '#/components/responses/BadRequest'
+      '401':
+        $ref: '#/components/responses/Unauthorized'

@@ -1,0 +1,26 @@
+/users/me:
+  patch:
+    tags: [Users]
+    summary: Update current user profile
+    operationId: updateUser
+    security:
+      - cookieAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateUserBody'
+    responses:
+      '200':
+        description: User updated
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserEntity'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+      '401':
+        $ref: '#/components/responses/Unauthorized'
+      '409':
+        $ref: '#/components/responses/Conflict'

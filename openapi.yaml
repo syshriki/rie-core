@@ -1,0 +1,887 @@
+openapi: 3.0.3
+info:
+  title: RIE Server API
+  description: Recipe Information Exchange Server
+  version: 1.0.0
+servers:
+  - url: http://localhost:8001
+    description: Development
+security: []
+tags:
+  - name: Users
+    description: User management and profiles
+  - name: Recipes
+    description: Recipe CRUD and favorites
+  - name: News
+    description: News feed
+  - name: Anonymous
+    description: Public endpoints (no authentication required)
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: access_token
+      description: JWT stored in an httpOnly cookie
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT passed via Authorization header
+  parameters:
+    userId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: User ID
+    slug:
+      name: slug
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 2
+        maxLength: 100
+      description: Recipe slug
+    authorId:
+      name: authorId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Author user ID
+    q:
+      name: q
+      in: query
+      required: false
+      schema:
+        type: string
+        default: ''
+      description: Search term for filtering by title or description
+    cursor:
+      name: cursor
+      in: query
+      required: false
+      schema:
+        type: string
+        nullable: true
+      description: Cursor for cursor-based pagination
+    page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+      description: Page number for page-based pagination (cannot use with cursor)
+    pageSize:
+      name: pageSize
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 10
+        minimum: 1
+        maximum: 100
+      description: Number of items per page
+  schemas:
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+      required:
+        - message
+    UserEntity:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        createdAt:
+          type: integer
+      required:
+        - id
+        - username
+        - createdAt
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        createdAt:
+          type: integer
+        recipeCount:
+          type: integer
+        favoriteCount:
+          type: integer
+      required:
+        - id
+        - username
+        - createdAt
+        - recipeCount
+        - favoriteCount
+    UserCreateInput:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+      required:
+        - id
+    RecipeEntity:
+      type: object
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        ingredients:
+          type: string
+          nullable: true
+        recipe:
+          type: string
+        authorId:
+          type: string
+        createdAt:
+          type: integer
+        updatedAt:
+          type: integer
+      required:
+        - id
+        - slug
+        - title
+        - recipe
+        - authorId
+        - createdAt
+        - updatedAt
+    RecipeOutput:
+      allOf:
+        - $ref: '#/components/schemas/RecipeEntity'
+        - type: object
+          properties:
+            isFavorite:
+              type: boolean
+          required:
+            - isFavorite
+    RecipeWithAuthor:
+      allOf:
+        - $ref: '#/components/schemas/RecipeOutput'
+        - type: object
+          properties:
+            authorUsername:
+              type: string
+          required:
+            - authorUsername
+    RecipeWithAuthorAnon:
+      allOf:
+        - $ref: '#/components/schemas/RecipeEntity'
+        - type: object
+          properties:
+            authorUsername:
+              type: string
+          required:
+            - authorUsername
+    RecipesCursorResponse:
+      type: object
+      properties:
+        recipes:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecipeOutput'
+        hasMore:
+          type: boolean
+        nextCursor:
+          type: integer
+          nullable: true
+      required:
+        - recipes
+        - hasMore
+        - nextCursor
+    RecipesPageResponse:
+      type: object
+      properties:
+        recipes:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecipeOutput'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+      required:
+        - recipes
+        - pagination
+    RecipesCursorResponseAnon:
+      type: object
+      properties:
+        recipes:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecipeEntity'
+        hasMore:
+          type: boolean
+        nextCursor:
+          type: integer
+          nullable: true
+      required:
+        - recipes
+        - hasMore
+        - nextCursor
+    RecipesPageResponseAnon:
+      type: object
+      properties:
+        recipes:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecipeEntity'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+      required:
+        - recipes
+        - pagination
+    PaginationInfo:
+      type: object
+      properties:
+        currentPage:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+        totalItems:
+          type: integer
+        hasNextPage:
+          type: boolean
+        hasPreviousPage:
+          type: boolean
+      required:
+        - currentPage
+        - pageSize
+        - totalPages
+        - totalItems
+        - hasNextPage
+        - hasPreviousPage
+    RecipeFavoriteEntity:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        recipeId:
+          type: integer
+        userId:
+          type: string
+        createdAt:
+          type: integer
+      required:
+        - id
+        - username
+        - recipeId
+        - userId
+        - createdAt
+    FavoritesResponse:
+      type: object
+      properties:
+        recipes:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecipeOutput'
+        hasMore:
+          type: boolean
+        nextCursor:
+          type: integer
+          nullable: true
+      required:
+        - recipes
+        - hasMore
+        - nextCursor
+    UserRecipesResponse:
+      type: object
+      properties:
+        recipes:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecipeOutput'
+        hasMore:
+          type: boolean
+        nextCursor:
+          type: integer
+          nullable: true
+      required:
+        - recipes
+        - hasMore
+        - nextCursor
+    UserRecipesResponseAnon:
+      type: object
+      properties:
+        recipes:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecipeEntity'
+        hasMore:
+          type: boolean
+        nextCursor:
+          type: integer
+          nullable: true
+      required:
+        - recipes
+        - hasMore
+        - nextCursor
+    NewsEntity:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        text:
+          type: string
+        type:
+          type: string
+        authorId:
+          type: string
+        recipeSlug:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+      required:
+        - id
+        - title
+        - text
+        - type
+        - authorId
+        - createdAt
+    NewsListResponse:
+      type: object
+      properties:
+        news:
+          type: array
+          items:
+            $ref: '#/components/schemas/NewsEntity'
+        hasMore:
+          type: boolean
+        nextCursor:
+          type: string
+          nullable: true
+      required:
+        - news
+        - hasMore
+        - nextCursor
+    CreateRecipeBody:
+      type: object
+      required:
+        - title
+        - recipe
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        ingredients:
+          type: string
+        recipe:
+          type: string
+    UpdateRecipeBody:
+      type: object
+      required:
+        - title
+        - recipe
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        ingredients:
+          type: string
+        recipe:
+          type: string
+    CreateNewsBody:
+      type: object
+      required:
+        - title
+        - text
+        - type
+      properties:
+        title:
+          type: string
+        text:
+          type: string
+        type:
+          type: string
+        recipeSlug:
+          type: string
+          nullable: true
+    UpdateUserBody:
+      type: object
+      required:
+        - username
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 100
+          pattern: '^[a-zA-Z0-9_\-\\s]+$'
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Missing or invalid authentication
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Not authorized to perform this action
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Resource already exists
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+paths:
+  /news:
+    post:
+      tags:
+        - News
+      summary: Create a news item
+      operationId: createNews
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNewsBody'
+      responses:
+        '201':
+          description: News item created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewsEntity'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    get:
+      tags:
+        - News
+      summary: List news items
+      operationId: getNews
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/cursor'
+        - $ref: '#/components/parameters/pageSize'
+      responses:
+        '200':
+          description: Paginated news list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewsListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /recipes/{slug}/favorite:
+    post:
+      tags:
+        - Recipes
+      summary: Add a recipe to favorites
+      operationId: addFavorite
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/slug'
+      responses:
+        '200':
+          description: Favorite added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecipeFavoriteEntity'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      tags:
+        - Recipes
+      summary: Remove a recipe from favorites
+      operationId: removeFavorite
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/slug'
+      responses:
+        '204':
+          description: Favorite removed
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /recipes:
+    post:
+      tags:
+        - Recipes
+      summary: Create a new recipe
+      operationId: createRecipe
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRecipeBody'
+      responses:
+        '201':
+          description: Recipe created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecipeEntity'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    get:
+      tags:
+        - Recipes
+      summary: Search and list recipes
+      operationId: searchRecipes
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/cursor'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      responses:
+        '200':
+          description: Paginated recipe list (cursor or page-based)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/RecipesCursorResponse'
+                  - $ref: '#/components/schemas/RecipesPageResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /recipes/{slug}:
+    delete:
+      tags:
+        - Recipes
+      summary: Delete a recipe (soft delete)
+      operationId: deleteRecipe
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/slug'
+      responses:
+        '204':
+          description: Recipe soft-deleted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    get:
+      tags:
+        - Recipes
+      summary: Get a recipe by slug
+      operationId: getRecipe
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/slug'
+      responses:
+        '200':
+          description: Recipe with author info and favorite status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecipeWithAuthor'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      tags:
+        - Recipes
+      summary: Update a recipe
+      operationId: updateRecipe
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/slug'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRecipeBody'
+      responses:
+        '200':
+          description: Recipe updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecipeEntity'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /anonymous/recipes:
+    get:
+      tags:
+        - Anonymous
+      summary: Search and list recipes (no auth)
+      operationId: searchRecipesAnonymous
+      parameters:
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/cursor'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      responses:
+        '200':
+          description: Paginated recipe list (cursor or page-based)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/RecipesCursorResponseAnon'
+                  - $ref: '#/components/schemas/RecipesPageResponseAnon'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /anonymous/recipes/{slug}:
+    get:
+      tags:
+        - Anonymous
+      summary: Get a recipe by slug (no auth)
+      operationId: getRecipeAnonymous
+      parameters:
+        - $ref: '#/components/parameters/slug'
+      responses:
+        '200':
+          description: Recipe with author username
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecipeWithAuthorAnon'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /users:
+    post:
+      tags:
+        - Users
+      summary: Create a new user from the authenticated JWT
+      operationId: createUser
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserEntity'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: User ID already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Failed to generate unique username
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /users/{id}:
+    delete:
+      tags:
+        - Users
+      summary: Delete a user and all their data
+      operationId: deleteUser
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      responses:
+        '204':
+          description: User and all associated data deleted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    get:
+      tags:
+        - Users
+      summary: Get a user by ID
+      operationId: getUser
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/UserProfile'
+                  - type: object
+                    properties:
+                      isCurrentUser:
+                        type: boolean
+                    required:
+                      - isCurrentUser
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /users/{id}/favorites:
+    get:
+      tags:
+        - Users
+      summary: Get a user's favorited recipes
+      operationId: getUserFavorites
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/userId'
+        - $ref: '#/components/parameters/cursor'
+        - $ref: '#/components/parameters/pageSize'
+      responses:
+        '200':
+          description: Paginated list of favorited recipes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FavoritesResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /users/me:
+    get:
+      tags:
+        - Users
+      summary: Get current user profile
+      operationId: getMe
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Current user profile with recipe and favorite counts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    patch:
+      tags:
+        - Users
+      summary: Update current user profile
+      operationId: updateUser
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserBody'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserEntity'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /users/{id}/recipes:
+    get:
+      tags:
+        - Users
+      summary: Get recipes by a user
+      operationId: getUserRecipes
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/userId'
+        - $ref: '#/components/parameters/cursor'
+        - $ref: '#/components/parameters/pageSize'
+      responses:
+        '200':
+          description: Paginated list of recipes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRecipesResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /anonymous/users/{authorId}/recipes:
+    get:
+      tags:
+        - Anonymous
+      summary: Get recipes by an author (no auth)
+      operationId: getUserRecipesAnonymous
+      parameters:
+        - $ref: '#/components/parameters/authorId'
+        - $ref: '#/components/parameters/cursor'
+        - $ref: '#/components/parameters/pageSize'
+      responses:
+        '200':
+          description: Paginated list of recipes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRecipesResponseAnon'
+        '400':
+          $ref: '#/components/responses/BadRequest'

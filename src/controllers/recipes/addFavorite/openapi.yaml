@@ -1,0 +1,20 @@
+/recipes/{slug}/favorite:
+  post:
+    tags: [Recipes]
+    summary: Add a recipe to favorites
+    operationId: addFavorite
+    security:
+      - cookieAuth: []
+    parameters:
+      - $ref: '#/components/parameters/slug'
+    responses:
+      '200':
+        description: Favorite added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecipeFavoriteEntity'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+      '401':
+        $ref: '#/components/responses/Unauthorized'

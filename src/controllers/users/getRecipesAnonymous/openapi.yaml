@@ -1,0 +1,18 @@
+/anonymous/users/{authorId}/recipes:
+  get:
+    tags: [Anonymous]
+    summary: Get recipes by an author (no auth)
+    operationId: getUserRecipesAnonymous
+    parameters:
+      - $ref: '#/components/parameters/authorId'
+      - $ref: '#/components/parameters/cursor'
+      - $ref: '#/components/parameters/pageSize'
+    responses:
+      '200':
+        description: Paginated list of recipes
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRecipesResponseAnon'
+      '400':
+        $ref: '#/components/responses/BadRequest'

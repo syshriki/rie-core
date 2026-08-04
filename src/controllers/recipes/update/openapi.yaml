@@ -1,0 +1,28 @@
+/recipes/{slug}:
+  put:
+    tags: [Recipes]
+    summary: Update a recipe
+    operationId: updateRecipe
+    security:
+      - cookieAuth: []
+    parameters:
+      - $ref: '#/components/parameters/slug'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateRecipeBody'
+    responses:
+      '200':
+        description: Recipe updated
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecipeEntity'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+      '401':
+        $ref: '#/components/responses/Unauthorized'
+      '403':
+        $ref: '#/components/responses/Forbidden'

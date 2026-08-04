@@ -1,0 +1,18 @@
+/recipes/{slug}:
+  delete:
+    tags: [Recipes]
+    summary: Delete a recipe (soft delete)
+    operationId: deleteRecipe
+    security:
+      - cookieAuth: []
+    parameters:
+      - $ref: '#/components/parameters/slug'
+    responses:
+      '204':
+        description: Recipe soft-deleted
+      '400':
+        $ref: '#/components/responses/BadRequest'
+      '401':
+        $ref: '#/components/responses/Unauthorized'
+      '403':
+        $ref: '#/components/responses/Forbidden'

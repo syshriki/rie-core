@@ -1,0 +1,27 @@
+/users/{id}:
+  get:
+    tags: [Users]
+    summary: Get a user by ID
+    operationId: getUser
+    security:
+      - cookieAuth: []
+    parameters:
+      - $ref: '#/components/parameters/userId'
+    responses:
+      '200':
+        description: User profile
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/UserProfile'
+                - type: object
+                  properties:
+                    isCurrentUser:
+                      type: boolean
+                  required:
+                    - isCurrentUser
+      '400':
+        $ref: '#/components/responses/BadRequest'
+      '401':
+        $ref: '#/components/responses/Unauthorized'

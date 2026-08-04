@@ -1,0 +1,18 @@
+/users/me:
+  get:
+    tags: [Users]
+    summary: Get current user profile
+    operationId: getMe
+    security:
+      - cookieAuth: []
+    responses:
+      '200':
+        description: Current user profile with recipe and favorite counts
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfile'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+      '401':
+        $ref: '#/components/responses/Unauthorized'

@@ -1,0 +1,19 @@
+/news:
+  get:
+    tags: [News]
+    summary: List news items
+    operationId: getNews
+    security:
+      - cookieAuth: []
+    parameters:
+      - $ref: '#/components/parameters/cursor'
+      - $ref: '#/components/parameters/pageSize'
+    responses:
+      '200':
+        description: Paginated news list
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewsListResponse'
+      '401':
+        $ref: '#/components/responses/Unauthorized'

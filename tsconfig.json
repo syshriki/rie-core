@@ -3,7 +3,8 @@
     "noEmit": true, // Optional - see note below
     "target": "esnext",
     "strict": true,
-    "module": "nodenext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "rewriteRelativeImportExtensions": true,
     "erasableSyntaxOnly": true,
     "allowImportingTsExtensions": true,

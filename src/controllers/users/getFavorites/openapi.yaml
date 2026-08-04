@@ -1,0 +1,20 @@
+/users/{id}/favorites:
+  get:
+    tags: [Users]
+    summary: Get a user's favorited recipes
+    operationId: getUserFavorites
+    security:
+      - cookieAuth: []
+    parameters:
+      - $ref: '#/components/parameters/userId'
+      - $ref: '#/components/parameters/cursor'
+      - $ref: '#/components/parameters/pageSize'
+    responses:
+      '200':
+        description: Paginated list of favorited recipes
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FavoritesResponse'
+      '401':
+        $ref: '#/components/responses/Unauthorized'

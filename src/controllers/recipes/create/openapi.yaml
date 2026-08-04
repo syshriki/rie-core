@@ -1,0 +1,24 @@
+/recipes:
+  post:
+    tags: [Recipes]
+    summary: Create a new recipe
+    operationId: createRecipe
+    security:
+      - cookieAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateRecipeBody'
+    responses:
+      '201':
+        description: Recipe created
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecipeEntity'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+      '401':
+        $ref: '#/components/responses/Unauthorized'

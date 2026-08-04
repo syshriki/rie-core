@@ -1,0 +1,16 @@
+/anonymous/recipes/{slug}:
+  get:
+    tags: [Anonymous]
+    summary: Get a recipe by slug (no auth)
+    operationId: getRecipeAnonymous
+    parameters:
+      - $ref: '#/components/parameters/slug'
+    responses:
+      '200':
+        description: Recipe with author username
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecipeWithAuthorAnon'
+      '400':
+        $ref: '#/components/responses/BadRequest'

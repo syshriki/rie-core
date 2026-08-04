@@ -1,0 +1,20 @@
+/recipes/{slug}:
+  get:
+    tags: [Recipes]
+    summary: Get a recipe by slug
+    operationId: getRecipe
+    security:
+      - cookieAuth: []
+    parameters:
+      - $ref: '#/components/parameters/slug'
+    responses:
+      '200':
+        description: Recipe with author info and favorite status
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecipeWithAuthor'
+      '400':
+        $ref: '#/components/responses/BadRequest'
+      '401':
+        $ref: '#/components/responses/Unauthorized'

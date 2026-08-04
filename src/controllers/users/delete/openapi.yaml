@@ -1,0 +1,18 @@
+/users/{id}:
+  delete:
+    tags: [Users]
+    summary: Delete a user and all their data
+    operationId: deleteUser
+    security:
+      - cookieAuth: []
+    parameters:
+      - $ref: '#/components/parameters/userId'
+    responses:
+      '204':
+        description: User and all associated data deleted
+      '400':
+        $ref: '#/components/responses/BadRequest'
+      '401':
+        $ref: '#/components/responses/Unauthorized'
+      '403':
+        $ref: '#/components/responses/Forbidden'
